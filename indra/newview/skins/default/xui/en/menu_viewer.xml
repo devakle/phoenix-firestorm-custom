@@ -860,6 +860,13 @@
              parameter="club_invite" />
         </menu_item_call>
         <menu_item_call
+         label="Friends Here..."
+         name="Friends Here">
+            <menu_item_call.on_click
+             function="Floater.ToggleOrBringToFront"
+             parameter="friends_here" />
+        </menu_item_call>
+        <menu_item_call
          label="Groups"
          name="My Groups"
          shortcut="control|shift|G">

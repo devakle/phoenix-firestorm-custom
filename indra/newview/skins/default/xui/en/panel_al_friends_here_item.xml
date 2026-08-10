@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel
+        follows="top|left|right"
+        height="44"
+        layout="topleft"
+        left="0"
+        name="friends_here_item"
+        top="0"
+        width="308">
+
+    <text
+        follows="left|top|right"
+        font="SansSerifSmall"
+        height="18"
+        layout="topleft"
+        left="4"
+        name="contact_name"
+        top="3"
+        use_ellipses="true"
+        width="112" />
+
+    <text
+        follows="left|top"
+        font="SansSerifSmall"
+        height="18"
+        left_pad="4"
+        name="time_here"
+        top="3"
+        width="48">
+        --
+    </text>
+
+    <combo_box
+        follows="left|top"
+        height="20"
+        left_pad="4"
+        name="greet_type"
+        top="1"
+        width="76">
+        <combo_box.item
+            label="Greet"
+            name="greet"
+            value="greet" />
+        <combo_box.item
+            label="Welcome back"
+            name="wb"
+            value="wb" />
+    </combo_box>
+
+    <button
+        follows="left|top"
+        height="20"
+        label="Send"
+        label_selected="Send"
+        left_pad="4"
+        name="greet_btn"
+        top="1"
+        width="54" />
+
+    <line_editor
+        follows="left|top|right"
+        height="18"
+        left="4"
+        max_length_chars="63"
+        name="contact_alias"
+        top="25"
+        right="-4" />
+</panel>
