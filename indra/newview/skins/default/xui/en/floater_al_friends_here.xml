@@ -38,6 +38,16 @@
         top="10"
         width="200" />
 
+    <line_editor
+        follows="top|left|right"
+        height="20"
+        left="8"
+        max_length_chars="127"
+        name="custom_greeting"
+        right="-8"
+        tool_tip="Leave empty for the default Greet / Welcome back greetings. Use [name] (or [alias]) to insert each contact's name."
+        top="30" />
+
     <flat_list_view
         allow_select="false"
         follows="all"
@@ -48,7 +58,7 @@
         left="6"
         multi_select="false"
         name="friend_list"
-        top="34"
+        top="56"
         right="-6"
         bottom="-6">
         <flat_list_view.no_items_text
