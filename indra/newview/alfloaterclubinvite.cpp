@@ -36,13 +36,25 @@
 #include "llviewerinventory.h"
 #include "llavatarnamecache.h"
 #include "llviewercontrol.h"
+#include "llagent.h"
+#include "llworld.h"
+#include "llviewerregion.h"
 
 static const std::string TOKEN_CLUB("[club]");
 static const std::string TOKEN_SLURL("[slurl]");
 static const std::string TOKEN_NAME("[name]");
 static const std::string AL_CLUB_INVITE_ALIASES_SETTING("ALClubInviteAliases");
 static const std::string AL_CLUB_INVITE_COOLDOWN_SETTING("ALClubInviteCooldowns");
-static const F32           CLUB_INVITE_COOLDOWN_SECONDS(30.f * 60.f);
+static const std::string AL_CLUB_INVITE_NEVER_IM_SETTING("ALClubInviteNeverIM");
+static const std::string AL_CLUB_INVITE_SEND_DELAY_SETTING("ALClubInviteSendDelay");
+static const std::string AL_CLUB_INVITE_RESEND_COOLDOWN_SETTING("ALClubInviteResendCooldownMinutes");
+static const F32          DEFAULT_CLUB_INVITE_RESEND_COOLDOWN_MINUTES(30.f);
+
+static F32 getSavedF32Setting(const std::string& name, F32 fallback)
+{
+    LLControlVariablePtr control = gSavedPerAccountSettings.getControl(name);
+    return control ? (F32)control->getValue().asReal() : fallback;
+}
 
 class ALClubInviteContactItem final : public LLPanel
 {
@@ -54,19 +66,23 @@ public:
 
     const LLUUID& getAvatarID() const { return mAvatarID; }
     bool isEnabled() const;
-    void setAvatarName(const std::string& avatar_name);
+    void setAvatarName(const std::string& display_name, const std::string& account_name);
     std::string getAlias() const;
     void setOnCooldown(bool cooldown);
 
 private:
     void onAliasEdited();
+    void onNeverIMChanged();
+    void updateEnabledControls();
     bool focusSiblingAlias(bool forward);
 
     LLUUID      mAvatarID;
     LLCheckBoxCtrl* mEnabledCheck = nullptr;
     LLTextBox*  mNameText = nullptr;
     LLLineEditor* mAliasEdit = nullptr;
+    LLCheckBoxCtrl* mNeverIMCheck = nullptr;
     bool        mOnCooldown = false;
+    bool        mNeverIM = false;
 };
 
 ALClubInviteContactItem::ALClubInviteContactItem(const LLUUID& avatar_id)
@@ -81,6 +97,7 @@ bool ALClubInviteContactItem::postBuild()
     mEnabledCheck = getChild<LLCheckBoxCtrl>("contact_enabled");
     mNameText = getChild<LLTextBox>("contact_name");
     mAliasEdit = getChild<LLLineEditor>("contact_alias");
+    mNeverIMCheck = getChild<LLCheckBoxCtrl>("contact_no_im");
     setValue(LLSD(mAvatarID));
 
     const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
@@ -89,6 +106,15 @@ bool ALClubInviteContactItem::postBuild()
     {
         mAliasEdit->setText(saved_alias);
     }
+
+    const LLSD never_im = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_NEVER_IM_SETTING);
+    mNeverIM = never_im[mAvatarID.asString()].asBoolean();
+    if (mNeverIMCheck)
+    {
+        mNeverIMCheck->set(mNeverIM);
+        mNeverIMCheck->setCommitCallback(boost::bind(&ALClubInviteContactItem::onNeverIMChanged, this));
+    }
+    updateEnabledControls();
 
     mAliasEdit->setCommitCallback(boost::bind(&ALClubInviteContactItem::onAliasEdited, this));
     mAliasEdit->setCommitOnFocusLost(true);
@@ -179,15 +205,24 @@ void ALClubInviteContactItem::onAliasEdited()
 
 bool ALClubInviteContactItem::isEnabled() const
 {
-    return !mOnCooldown && mEnabledCheck && mEnabledCheck->get();
+    return !mNeverIM && !mOnCooldown && mEnabledCheck && mEnabledCheck->get();
 }
 
-void ALClubInviteContactItem::setAvatarName(const std::string& avatar_name)
+void ALClubInviteContactItem::setAvatarName(const std::string& display_name,
+                                            const std::string& account_name)
 {
-    mNameText->setText(avatar_name);
-    if (mAliasEdit->getText().empty())
+    std::string label = display_name;
+    if (!display_name.empty() && !account_name.empty())
     {
-        mAliasEdit->setText(avatar_name);
+        label += " (" + account_name + ")";
+    }
+    if (mNameText)
+    {
+        mNameText->setText(label);
+    }
+    if (mAliasEdit->getText().empty() && !display_name.empty())
+    {
+        mAliasEdit->setText(display_name);
     }
 }
 
@@ -199,9 +234,23 @@ std::string ALClubInviteContactItem::getAlias() const
 void ALClubInviteContactItem::setOnCooldown(bool cooldown)
 {
     mOnCooldown = cooldown;
+    updateEnabledControls();
+}
+
+void ALClubInviteContactItem::onNeverIMChanged()
+{
+    mNeverIM = mNeverIMCheck && mNeverIMCheck->get();
+    LLSD never_im = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_NEVER_IM_SETTING);
+    never_im[mAvatarID.asString()] = mNeverIM;
+    gSavedPerAccountSettings.setLLSD(AL_CLUB_INVITE_NEVER_IM_SETTING, never_im);
+    updateEnabledControls();
+}
+
+void ALClubInviteContactItem::updateEnabledControls()
+{
     if (mEnabledCheck)
     {
-        mEnabledCheck->setEnabled(!cooldown);
+        mEnabledCheck->setEnabled(!mOnCooldown && !mNeverIM);
     }
 }
 
@@ -223,6 +272,7 @@ bool ALFloaterClubInvite::postBuild()
     mClubAlias = getChild<LLLineEditor>("club_alias");
     mClubSlurl = getChild<LLLineEditor>("club_slurl");
     mCooldownSpin = getChild<LLSpinCtrl>("cooldown_spin");
+    mResendSpin = getChild<LLSpinCtrl>("resend_cooldown_spin");
     mContactList = getChild<LLFlatListView>("contact_list");
     mStatusText = getChild<LLTextBox>("status_text");
     mObjectPanel = getChild<LLAssetFilteredInventoryPanel>("object_panel");
@@ -231,6 +281,15 @@ bool ALFloaterClubInvite::postBuild()
     mSendBtn->setCommitCallback(boost::bind(&ALFloaterClubInvite::onClickSend, this));
     getChild<LLButton>("stop_btn")->setCommitCallback(boost::bind(&ALFloaterClubInvite::onClickStop, this));
     getChild<LLButton>("stop_btn")->setEnabled(false);
+
+    mRefreshBtn = getChild<LLButton>("refresh_btn");
+    mRefreshBtn->setClickedCallback(boost::bind(&ALFloaterClubInvite::onClickRefresh, this));
+
+    mCooldownSpin->setCommitCallback(boost::bind(&ALFloaterClubInvite::onSendDelayCommit, this));
+    mResendSpin->setCommitCallback(boost::bind(&ALFloaterClubInvite::onResendCooldownCommit, this));
+    mCooldownSpin->set(getSavedF32Setting(AL_CLUB_INVITE_SEND_DELAY_SETTING, 10.f));
+    mResendSpin->set(getSavedF32Setting(AL_CLUB_INVITE_RESEND_COOLDOWN_SETTING,
+                                        DEFAULT_CLUB_INVITE_RESEND_COOLDOWN_MINUTES));
 
     if (mObjectPanel)
     {
@@ -283,6 +342,12 @@ void ALFloaterClubInvite::populateContacts()
             continue;
         }
 
+        // Never invite someone who is already here/nearby.
+        if (isInAgentRegion(avatar_id))
+        {
+            continue;
+        }
+
         ALClubInviteContactItem* item = new ALClubInviteContactItem(avatar_id);
         item->setOnCooldown(isOnCooldown(avatar_id));
         mContactList->addItem(item, LLSD(avatar_id));
@@ -293,13 +358,18 @@ void ALFloaterClubInvite::populateContacts()
     }
 }
 
+void ALFloaterClubInvite::onClickRefresh()
+{
+    populateContacts();
+}
+
 void ALFloaterClubInvite::onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname)
 {
     ALClubInviteContactItem* item =
         mContactList->getTypedItemByValue<ALClubInviteContactItem>(LLSD(agent_id));
     if (item)
     {
-        item->setAvatarName(avname.getDisplayName());
+        item->setAvatarName(avname.getDisplayName(), avname.getAccountName());
     }
 }
 
@@ -385,7 +455,46 @@ bool ALFloaterClubInvite::isOnCooldown(const LLUUID& avatar_id) const
     {
         return false;
     }
-    return (LLDate::now().secondsSinceEpoch() - last_sent) < CLUB_INVITE_COOLDOWN_SECONDS;
+    const F32 cooldown_minutes = mResendSpin ? mResendSpin->getValueF32()
+                                             : DEFAULT_CLUB_INVITE_RESEND_COOLDOWN_MINUTES;
+    return (LLDate::now().secondsSinceEpoch() - last_sent) < (F64)(cooldown_minutes * 60.f);
+}
+
+bool ALFloaterClubInvite::isInAgentRegion(const LLUUID& avatar_id) const
+{
+    const LLViewerRegion* agent_region = gAgent.getRegion();
+    if (!agent_region)
+    {
+        return false;
+    }
+    const LLUUID agent_region_id = agent_region->getRegionID();
+
+    uuid_vec_t avatar_ids;
+    std::vector<LLVector3d> avatar_positions;
+    LLWorld::getInstance()->getAvatars(&avatar_ids, &avatar_positions);
+    for (S32 i = 0; i < (S32)avatar_ids.size(); ++i)
+    {
+        if (avatar_ids[i] != avatar_id)
+        {
+            continue;
+        }
+        const LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(avatar_positions[i]);
+        if (region && region->getRegionID() == agent_region_id)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ALFloaterClubInvite::onSendDelayCommit()
+{
+    gSavedPerAccountSettings.setF32(AL_CLUB_INVITE_SEND_DELAY_SETTING, mCooldownSpin->getValueF32());
+}
+
+void ALFloaterClubInvite::onResendCooldownCommit()
+{
+    gSavedPerAccountSettings.setF32(AL_CLUB_INVITE_RESEND_COOLDOWN_SETTING, mResendSpin->getValueF32());
 }
 
 void ALFloaterClubInvite::markCooldown(const LLUUID& avatar_id)

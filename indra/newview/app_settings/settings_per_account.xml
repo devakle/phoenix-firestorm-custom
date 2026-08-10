@@ -1585,5 +1585,49 @@
             <key>Value</key>
             <map/>
         </map>
+    <key>ALClubInviteNeverIM</key>
+        <map>
+            <key>Comment</key>
+            <string>Map of avatar ID to true if that contact must never receive a club invitation IM.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>LLSD</string>
+            <key>Value</key>
+            <map/>
+        </map>
+    <key>ALClubInviteSendDelay</key>
+        <map>
+            <key>Comment</key>
+            <string>Seconds to wait between each club invitation IM while sending to multiple contacts.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>F32</string>
+            <key>Value</key>
+            <real>10</real>
+        </map>
+    <key>ALClubInviteResendCooldownMinutes</key>
+        <map>
+            <key>Comment</key>
+            <string>Minutes a contact must wait before being re-invited after receiving a club invitation.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>F32</string>
+            <key>Value</key>
+            <real>30</real>
+        </map>
+    <key>ALFriendsHereCustomGreeting</key>
+        <map>
+            <key>Comment</key>
+            <string>Custom greeting template for the Friends Here floater. [name]/[alias] is replaced with each contact's name. Empty keeps the default Greet/Welcome back greetings.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>String</string>
+            <key>Value</key>
+            <string></string>
+        </map>
     </map>
 </llsd>

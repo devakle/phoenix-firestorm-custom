@@ -42,6 +42,7 @@ private:
     void onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname);
 
     void populateContacts();
+    void onClickRefresh();
     void sendCoro(const std::vector<std::pair<LLUUID, std::string>>& recipients, F32 cooldown);
 
     static std::string composeMessage(const std::string& base, const std::string& club,
@@ -49,6 +50,10 @@ private:
 
     bool isOnCooldown(const LLUUID& avatar_id) const;
     void markCooldown(const LLUUID& avatar_id);
+    bool isInAgentRegion(const LLUUID& avatar_id) const;
+
+    void onSendDelayCommit();
+    void onResendCooldownCommit();
 
     bool                     mSending = false;
     bool                     mStopRequested = false;
@@ -59,9 +64,11 @@ private:
     LLLineEditor*            mClubAlias = nullptr;
     LLLineEditor*            mClubSlurl = nullptr;
     LLSpinCtrl*              mCooldownSpin = nullptr;
+    LLSpinCtrl*              mResendSpin = nullptr;
     LLFlatListView*          mContactList = nullptr;
     LLAssetFilteredInventoryPanel* mObjectPanel = nullptr;
     LLButton*                mSendBtn = nullptr;
+    LLButton*                mRefreshBtn = nullptr;
     LLTextBox*               mStatusText = nullptr;
 
     std::vector<boost::signals2::connection> mAvatarNameConnections;

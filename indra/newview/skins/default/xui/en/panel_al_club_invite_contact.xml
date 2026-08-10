@@ -6,7 +6,7 @@
         left="0"
         name="club_invite_contact_item"
         top="0"
-        width="418">
+        width="478">
 
     <check_box
         follows="left|top"
@@ -27,7 +27,19 @@
         name="contact_name"
         top="2"
         use_ellipses="true"
-        width="150" />
+        width="168" />
+
+    <check_box
+        follows="left|top"
+        height="16"
+        initial_value="false"
+        label="No IM"
+        label_width="36"
+        layout="topleft"
+        left_pad="4"
+        name="contact_no_im"
+        top="3"
+        width="56" />
 
     <text
         follows="left|top|right"
