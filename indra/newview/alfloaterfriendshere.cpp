@@ -63,7 +63,6 @@ public:
 
         mAliasEdit->setCommitCallback(boost::bind(&ALFriendsHereItem::onAliasEdited, this));
         mAliasEdit->setCommitOnFocusLost(true);
-        mAliasEdit->setKeystrokeCallback(boost::bind(&ALFriendsHereItem::onAliasEdited, this), nullptr);
         mGreetBtn->setClickedCallback(boost::bind(&ALFriendsHereItem::onGreet, this));
         return TRUE;
     }
@@ -352,14 +351,4 @@ void ALFloaterFriendsHere::onAvatarNameLoaded(const LLUUID& agent_id, const LLAv
             break;
         }
     }
-}
-
-bool ALFloaterFriendsHere::hasArrivedRecent(const LLUUID& id, F32 seconds_ago_cutoff) const
-{
-    arrival_time_map_t::const_iterator it = mArrivalTimes.find(id);
-    if (it == mArrivalTimes.end())
-    {
-        return false;
-    }
-    return (LLDate::now().secondsSinceEpoch() - it->second) < (F64)seconds_ago_cutoff;
 }

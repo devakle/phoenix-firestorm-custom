@@ -37,17 +37,13 @@ public:
     void onOpen(const LLSD& key) override;
     void onClose(bool app_quitting) override;
 
-    bool hasArrivedRecent(const LLUUID& id, F32 seconds_ago_cutoff) const;
-
 private:
     bool tick() override;
     void refreshFriendsList();
     void onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname);
-    std::string getAliasOrName(const LLUUID& id);
 
     typedef std::map<LLUUID, F64> arrival_time_map_t;
     arrival_time_map_t mArrivalTimes;
-    F64                mLastRefresh = 0.0;
 
     LLFlatListView* mFriendList = nullptr;
     LLTextBox*      mStatusText = nullptr;
