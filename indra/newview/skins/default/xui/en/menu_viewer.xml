@@ -853,6 +853,13 @@
              parameter="contact_sets_panel" />
         </menu_item_call>
         <menu_item_call
+         label="Club Invitation..."
+         name="Club Invitation">
+            <menu_item_call.on_click
+             function="Floater.ToggleOrBringToFront"
+             parameter="club_invite" />
+        </menu_item_call>
+        <menu_item_call
          label="Groups"
          name="My Groups"
          shortcut="control|shift|G">

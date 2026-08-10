@@ -188,6 +188,7 @@
 #include "rlvfloaters.h"
 // [/RLVa:KB]
 // ND: And for FS please put yours after this line, for easier merges too
+#include "alfloaterclubinvite.h"
 #include "alfloaterregiontracker.h"
 #include "animationexplorer.h"
 #include "ao.h"
@@ -434,6 +435,7 @@ void LLViewerFloaterReg::registerFloaters()
     // </FS:Ansariel> [FS communication UI]
     LLFloaterReg::add("chat_mention_picker", "floater_chat_mention_picker.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterChatMentionPicker>);
     LLFloaterReg::add("classified", "floater_classified.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterClassified>);
+    LLFloaterReg::add("club_invite", "floater_al_club_invite.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterClubInvite>);
     LLFloaterReg::add("compile_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCompileQueue>);
     LLFloaterReg::add("conversation", "floater_conversation_log.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterConversationLog>);
     LLFloaterReg::add("add_landmark", "floater_create_landmark.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCreateLandmark>);

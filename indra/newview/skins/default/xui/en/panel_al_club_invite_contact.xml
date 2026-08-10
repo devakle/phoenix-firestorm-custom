@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel
+        follows="top|left|right"
+        height="22"
+        layout="topleft"
+        left="0"
+        name="club_invite_contact_item"
+        top="0"
+        width="418">
+
+    <check_box
+        follows="left|top"
+        height="16"
+        initial_value="true"
+        layout="topleft"
+        left="0"
+        name="contact_enabled"
+        top="3"
+        width="18" />
+
+    <text
+        follows="left|top|right"
+        font="SansSerifSmall"
+        height="18"
+        layout="topleft"
+        left="24"
+        name="contact_name"
+        top="2"
+        use_ellipses="true"
+        width="150" />
+
+    <text
+        follows="left|top|right"
+        font="SansSerifSmall"
+        height="18"
+        layout="topleft"
+        left_pad="4"
+        name="contact_alias_label"
+        top="2"
+        width="34">
+        Alias
+    </text>
+
+    <line_editor
+        follows="left|top|right"
+        height="18"
+        layout="topleft"
+        left_pad="4"
+        max_length_chars="63"
+        name="contact_alias"
+        top="2"
+        right="-2" />
+</panel>

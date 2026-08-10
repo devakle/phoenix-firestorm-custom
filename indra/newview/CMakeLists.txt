@@ -87,6 +87,7 @@ endif ()
 
 set(viewer_SOURCE_FILES
 # <Add FS includes below this line>
+    alfloaterclubinvite.cpp
     alfloaterregiontracker.cpp
     animationexplorer.cpp
     ao.cpp
@@ -945,6 +946,7 @@ set(viewer_HEADER_FILES
     ViewerInstall.cmake
 
 # <Add FS includes below this line>
+    alfloaterclubinvite.h
     alfloaterregiontracker.h
     animationexplorer.h
     ao.h

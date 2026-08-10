@@ -1563,5 +1563,27 @@
             <key>Value</key>
             <map/>
         </map>
+    <key>ALClubInviteAliases</key>
+        <map>
+            <key>Comment</key>
+            <string>Map of avatar ID to alias used in the Club Invitation floater.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>LLSD</string>
+            <key>Value</key>
+            <map/>
+        </map>
+    <key>ALClubInviteCooldowns</key>
+        <map>
+            <key>Comment</key>
+            <string>Map of avatar ID to epoch time of the last club invitation sent, used to prevent re-inviting too soon.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>LLSD</string>
+            <key>Value</key>
+            <map/>
+        </map>
     </map>
 </llsd>

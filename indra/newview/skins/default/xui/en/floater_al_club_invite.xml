@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+        can_resize="true"
+        can_minimize="false"
+        height="520"
+        min_height="420"
+        min_width="430"
+        name="club_invite"
+        single_instance="true"
+        title="CLUB INVITATION"
+        width="430">
+
+    <floater.string name="ClubInviteNoRecipients">
+        No enabled contacts selected.
+    </floater.string>
+    <floater.string name="ClubInviteStopped">
+        Stopped.
+    </floater.string>
+    <floater.string name="ClubInviteFinished">
+        Done.
+    </floater.string>
+
+    <layout_stack
+        name="main_stack"
+        follows="all"
+        animate="false"
+        top="20"
+        left="6"
+        right="-6"
+        bottom="-10"
+        orientation="vertical">
+
+        <layout_panel
+            name="pnl_club"
+            border="false"
+            auto_resize="false"
+            user_resize="false"
+            height="28">
+            <text
+                follows="left|top"
+                font="SansSerifSmall"
+                height="18"
+                layout="topleft"
+                left="0"
+                name="club_alias_label"
+                top="6"
+                width="120">
+                Club Name
+            </text>
+            <line_editor
+                follows="left|top|right"
+                height="20"
+                layout="topleft"
+                left="120"
+                max_length_chars="63"
+                name="club_alias"
+                top="2"
+                right="-2" />
+        </layout_panel>
+
+        <layout_panel
+            name="pnl_slurl"
+            border="false"
+            auto_resize="false"
+            user_resize="false"
+            height="28">
+            <text
+                follows="left|top"
+                font="SansSerifSmall"
+                height="18"
+                layout="topleft"
+                left="0"
+                name="club_slurl_label"
+                top="6"
+                width="120">
+                Club SLURL
+            </text>
+            <line_editor
+                follows="left|top|right"
+                height="20"
+                layout="topleft"
+                left="120"
+                max_length_chars="255"
+                name="club_slurl"
+                top="2"
+                right="-2" />
+        </layout_panel>
+
+        <layout_panel
+            name="pnl_message"
+            border="false"
+            auto_resize="false"
+            user_resize="false"
+            height="80">
+            <text_editor
+                follows="all"
+                height="76"
+                layout="topleft"
+                left="0"
+                max_length="1024"
+                name="message_editor"
+                top="2"
+                right="-2"
+                word_wrap="true">
+Join [club]! Club SLURL: [slurl] -- [name]
+            </text_editor>
+        </layout_panel>
+
+        <layout_panel
+            name="pnl_object"
+            border="false"
+            auto_resize="false"
+            user_resize="false"
+            height="90">
+            <text
+                follows="left|top"
+                font="SansSerifSmall"
+                height="18"
+                layout="topleft"
+                left="0"
+                name="object_label"
+                top="2"
+                width="418">
+                Gift object (optional)
+            </text>
+            <panel
+                name="pnl_object_wrap"
+                follows="all"
+                layout="topleft"
+                left="0"
+                top="22"
+                right="-2"
+                bottom="-2"
+                background_visible="true"
+                bg_alpha_color="DkGray2">
+                <asset_filtered_inv_panel
+                    allow_multi_select="false"
+                    allow_drag="false"
+                    accepts_drag_and_drop="false"
+                    suppress_folder_menu="true"
+                    bg_visible="true"
+                    bg_alpha_color="DkGray2"
+                    border="false"
+                    follows="all"
+                    layout="topleft"
+                    left_delta="0"
+                    name="object_panel"
+                    top="1"
+                    right="-4"
+                    bottom="-1"
+                    filter_asset_types="object" />
+            </panel>
+        </layout_panel>
+
+        <layout_panel
+            name="pnl_cooldown"
+            border="false"
+            auto_resize="false"
+            user_resize="false"
+            height="28">
+            <spinner
+                follows="left|top|right"
+                decimal_digits="0"
+                height="23"
+                increment="1"
+                initial_value="10"
+                label="Cooldown (sec)"
+                label_width="150"
+                layout="topleft"
+                left="0"
+                max_val="30"
+                min_val="1"
+                name="cooldown_spin"
+                top="2"
+                width="250" />
+        </layout_panel>
+
+        <layout_panel
+            name="pnl_contacts"
+            border="false"
+            auto_resize="true"
+            user_resize="false"
+            height="100"
+            min_height="40">
+            <text
+                follows="left|top"
+                font="SansSerifSmall"
+                height="18"
+                layout="topleft"
+                left="0"
+                name="contacts_label"
+                top="0"
+                width="418">
+                Send to
+            </text>
+            <flat_list_view
+                allow_select="false"
+                follows="all"
+                height="70"
+                item_pad="2"
+                keep_scroll_pos="true"
+                layout="topleft"
+                left="0"
+                multi_select="false"
+                name="contact_list"
+                top="18"
+                right="-2"
+                bottom="-2">
+                <flat_list_view.no_items_text
+                    name="no_items_msg"
+                    value="No friends to invite." />
+            </flat_list_view>
+        </layout_panel>
+
+        <layout_panel
+            name="pnl_actions"
+            border="false"
+            auto_resize="false"
+            user_resize="false"
+            height="34">
+            <text
+                follows="left|top"
+                font="SansSerifSmall"
+                height="18"
+                layout="topleft"
+                left="0"
+                name="status_text"
+                top="8"
+                width="250"
+                use_ellipses="true" />
+            <button
+                follows="right|top"
+                height="24"
+                label="Send"
+                label_selected="Send"
+                layout="topleft"
+                left="-104"
+                name="send_btn"
+                top="4"
+                width="100" />
+            <button
+                follows="right|top"
+                height="24"
+                label="Stop"
+                label_selected="Stop"
+                layout="topleft"
+                left_delta="0"
+                name="stop_btn"
+                top_delta="0"
+                width="100" />
+        </layout_panel>
+    </layout_stack>
+</floater>
