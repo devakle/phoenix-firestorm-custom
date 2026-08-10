@@ -6,7 +6,7 @@
         left="0"
         name="al_aliases_contact_item"
         top="0"
-        width="382">
+        width="496">
 
     <text
         follows="left|top|right"
@@ -17,7 +17,7 @@
         name="contact_name"
         top="2"
         use_ellipses="true"
-        width="172" />
+        width="258" />
 
     <line_editor
         follows="left|top|right"
