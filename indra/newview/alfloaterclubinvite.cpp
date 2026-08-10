@@ -229,6 +229,9 @@ bool ALFloaterClubInvite::postBuild()
     {
         mObjectPanel->setSelectCallback(boost::bind(&ALFloaterClubInvite::onObjectSelected, this, _1, _2));
     }
+    mObjectSearch = getChild<LLLineEditor>("object_search");
+    mObjectSearch->setKeystrokeCallback(
+        boost::bind(&ALFloaterClubInvite::onObjectSearch, this, _1, _2), nullptr);
 
     return true;
 }
@@ -309,6 +312,14 @@ void ALFloaterClubInvite::onAvatarNameLoaded(const LLUUID& agent_id, const LLAva
     if (item)
     {
         item->setAvatarName(avname.getDisplayName(), avname.getAccountName());
+    }
+}
+
+void ALFloaterClubInvite::onObjectSearch(LLLineEditor* caller, void* /*user_data*/)
+{
+    if (mObjectPanel && caller)
+    {
+        mObjectPanel->setFilterSubString(caller->getText());
     }
 }
 

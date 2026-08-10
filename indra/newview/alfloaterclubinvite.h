@@ -37,6 +37,7 @@ public:
 
 private:
     void onObjectSelected(const std::deque<LLFolderViewItem*>& items, bool user_action);
+    void onObjectSearch(LLLineEditor* caller, void* user_data);
     void onClickSend();
     void onClickStop();
     void onClickAliases();
@@ -68,6 +69,7 @@ private:
     LLSpinCtrl*              mResendSpin = nullptr;
     LLFlatListView*          mContactList = nullptr;
     LLAssetFilteredInventoryPanel* mObjectPanel = nullptr;
+    LLLineEditor*            mObjectSearch = nullptr;
     LLButton*                mSendBtn = nullptr;
     LLButton*                mRefreshBtn = nullptr;
     LLTextBox*               mStatusText = nullptr;
