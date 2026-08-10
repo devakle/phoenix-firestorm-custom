@@ -3424,13 +3424,13 @@
     <key>CmdLineDisableVoice</key>
     <map>
       <key>Comment</key>
-      <string>Disable Voice.</string>
+      <string>Disable Voice. Set on in this build: voice is hard-disabled for privacy.</string>
       <key>Persist</key>
       <integer>0</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>CmdLineGridChoice</key>
     <map>
@@ -5309,13 +5309,13 @@
     <key>EnableVoiceChat</key>
     <map>
       <key>Comment</key>
-      <string>Enable talking to other residents with a microphone</string>
+      <string>Enable talking to other residents with a microphone. Voice is hard-disabled in this build for privacy.</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>EventURL</key>
     <map>

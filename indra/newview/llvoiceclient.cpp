@@ -620,15 +620,27 @@ bool LLVoiceClient::onVoiceEffectsNotSupported(const LLSD &notification, const L
 bool LLVoiceClient::voiceEnabled(bool no_cache)
 // </FS:Ansariel>
 {
+    // Voice is hard-disabled in this build for privacy: no voice signaling,
+    // no SIP/WebRTC connections and no audio traffic ever leaves this client.
+    // Returning false here gates every voice entry point (UI toggles, the
+    // WebRTC connection coroutine, P2P calls), so it cannot be re-enabled
+    // through preferences or settings.
+    static const bool voice_hard_disabled = true;
+
     if (no_cache)
     {
-        return gSavedSettings.getBOOL("EnableVoiceChat") && !gSavedSettings.getBOOL("CmdLineDisableVoice") && !gNonInteractive;
+        bool enabled = voice_hard_disabled ? false : (gSavedSettings.getBOOL("EnableVoiceChat") && !gSavedSettings.getBOOL("CmdLineDisableVoice") && !gNonInteractive);
+        return enabled;
     }
 
     static LLCachedControl<bool> enable_voice_chat(gSavedSettings, "EnableVoiceChat");
     static LLCachedControl<bool> cmd_line_disable_voice(gSavedSettings, "CmdLineDisableVoice");
-    bool enabled = enable_voice_chat && !cmd_line_disable_voice && !gNonInteractive;
-    if (enabled && !mVoiceEffectSupportNotified && getVoiceEffectEnabled() && !getVoiceEffectDefault().isNull())
+    bool enabled = voice_hard_disabled ? false : (enable_voice_chat && !cmd_line_disable_voice && !gNonInteractive);
+    if (!enabled)
+    {
+        return false;
+    }
+    if (!mVoiceEffectSupportNotified && getVoiceEffectEnabled() && !getVoiceEffectDefault().isNull())
     {
         static const LLSD args = llsd::map(
             "FAQ_URL", LLTrans::getString("no_voice_morphing_faq_url")
