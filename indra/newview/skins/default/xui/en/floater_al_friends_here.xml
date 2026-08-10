@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+        can_close="true"
+        can_drag_on_left="false"
+        can_minimize="true"
+        enable_hide_btn="false"
+        height="360"
+        min_height="220"
+        min_width="320"
+        name="friends_here"
+        title="Friends Here"
+        help_topic="friendshere"
+        width="320">
+
+    <floater.string name="FriendsHereStatus">
+        Friends in your parcel, ordered by arrival time.
+    </floater.string>
+    <floater.string name="FriendsHereNoFriends">
+        No friends in your parcel right now.
+    </floater.string>
+
+    <button
+        follows="top|right"
+        height="22"
+        label="Refresh"
+        label_selected="Refresh"
+        name="refresh_btn"
+        top="6"
+        right="-6"
+        width="70" />
+
+    <text
+        follows="top|left|right"
+        font="SansSerifSmall"
+        height="18"
+        left="8"
+        name="status_text"
+        top="10"
+        width="200" />
+
+    <flat_list_view
+        allow_select="false"
+        follows="all"
+        height="240"
+        item_pad="2"
+        keep_scroll_pos="true"
+        layout="topleft"
+        left="6"
+        multi_select="false"
+        name="friend_list"
+        top="34"
+        right="-6"
+        bottom="-6">
+        <flat_list_view.no_items_text
+            name="no_items_msg"
+            value="No friends here yet." />
+    </flat_list_view>
+</floater>
