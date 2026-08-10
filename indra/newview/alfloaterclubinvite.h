@@ -52,6 +52,7 @@ private:
 
     bool                     mSending = false;
     bool                     mStopRequested = false;
+    S32                      mSendGeneration = 1;
     LLUUID                   mObjectItemID;
 
     LLTextEditor*            mMessageEditor = nullptr;

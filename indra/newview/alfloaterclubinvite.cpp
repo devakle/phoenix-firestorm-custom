@@ -242,6 +242,13 @@ bool ALFloaterClubInvite::postBuild()
 
 void ALFloaterClubInvite::onOpen(const LLSD&)
 {
+    // A new open starts a fresh send cycle: any coroutine still running from a
+    // previous cycle is stale (generation mismatch) and must not touch the UI.
+    ++mSendGeneration;
+    mSending = false;
+    mStopRequested = false;
+    mSendBtn->setEnabled(true);
+    getChild<LLButton>("stop_btn")->setEnabled(false);
     populateContacts();
 }
 
@@ -360,6 +367,14 @@ void ALFloaterClubInvite::onClickSend()
 void ALFloaterClubInvite::onClickStop()
 {
     mStopRequested = true;
+    // Invalidate the running coroutine so its finish block can't re-enable the
+    // UI, and reset the UI here so Stop is immediate instead of waiting for the
+    // coroutine to reach its loop-top guard.
+    ++mSendGeneration;
+    mSending = false;
+    mSendBtn->setEnabled(true);
+    getChild<LLButton>("stop_btn")->setEnabled(false);
+    mStatusText->setText(getString("ClubInviteStopped"));
 }
 
 bool ALFloaterClubInvite::isOnCooldown(const LLUUID& avatar_id) const
@@ -382,12 +397,19 @@ void ALFloaterClubInvite::markCooldown(const LLUUID& avatar_id)
 
 void ALFloaterClubInvite::sendCoro(const std::vector<std::pair<LLUUID, std::string>>& recipients, F32 cooldown)
 {
+    if (LLFloaterReg::findInstance("club_invite") != this)
+    {
+        return;
+    }
+    const S32 generation = mSendGeneration;
     S32 total = (S32)recipients.size();
     S32 sent = 0;
     for (const auto& r : recipients)
     {
-        // Stop if the user requested it or the floater was closed.
-        if (LLFloaterReg::findInstance("club_invite") != this || mStopRequested)
+        // Stop if the user requested it, the floater was closed, or a newer
+        // send cycle started on this floater.
+        if (LLFloaterReg::findInstance("club_invite") != this || mStopRequested
+            || generation != mSendGeneration)
         {
             break;
         }
@@ -418,20 +440,31 @@ void ALFloaterClubInvite::sendCoro(const std::vector<std::pair<LLUUID, std::stri
 
         if (sent < total)
         {
-            llcoro::suspendUntilTimeout(cooldown);
+            // Wait in short chunks so Stop/Close is responsive during the
+            // cooldown instead of blocking for the full remaining period.
+            for (F32 remaining = cooldown;
+                 remaining > 0.f
+                 && LLFloaterReg::findInstance("club_invite") == this
+                 && !mStopRequested
+                 && generation == mSendGeneration;
+                 remaining -= 0.5f)
+            {
+                llcoro::suspendUntilTimeout(llmin(remaining, 0.5f));
+            }
         }
     }
 
-    if (LLFloaterReg::findInstance("club_invite") != this)
+    // Reset the UI only for the generation that started this send and only if
+    // the floater still exists; a stale coroutine must not touch the members of
+    // a destroyed floater or a newer send cycle.
+    if (LLFloaterReg::findInstance("club_invite") == this && generation == mSendGeneration)
     {
-        return; // floater destroyed; do not touch members
+        mSending = false;
+        mSendBtn->setEnabled(true);
+        getChild<LLButton>("stop_btn")->setEnabled(false);
+        mStatusText->setText(mStopRequested ? getString("ClubInviteStopped")
+                                            : getString("ClubInviteFinished"));
     }
-
-    mSending = false;
-    mSendBtn->setEnabled(true);
-    getChild<LLButton>("stop_btn")->setEnabled(false);
-    mStatusText->setText(mStopRequested ? getString("ClubInviteStopped")
-                                        : getString("ClubInviteFinished"));
 }
 
 std::string ALFloaterClubInvite::composeMessage(const std::string& base, const std::string& club,
