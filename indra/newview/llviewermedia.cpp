@@ -1801,6 +1801,18 @@ LLPluginClassMedia* LLViewerMediaImpl::newSourceFromMediaType(std::string media_
     }
 
     std::string plugin_basename = LLMIMETypes::implType(media_type);
+
+    // Web content is hard-disabled in this build for privacy: no web page can
+    // ever be fetched, so no media on prims (MOAP), no parcel web and no
+    // in-client browser (web profile, marketplace, destinations, help, login)
+    // connects to any external server. Only the CEF host carries web content;
+    // streaming/audio plugins (e.g. media_plugin_libvlc) are left untouched.
+    static const bool web_hard_disabled = true;
+    if (web_hard_disabled && plugin_basename == "media_plugin_cef")
+    {
+        return NULL;
+    }
+
     LLPluginClassMedia* media_source = NULL;
 
 #ifdef LL_LINUX
