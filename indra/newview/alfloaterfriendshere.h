@@ -41,6 +41,7 @@ public:
 private:
     bool tick() override;
     void refreshFriendsList();
+    void onClickAliases();
     void onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname);
     void onCustomGreetingCommit();
 

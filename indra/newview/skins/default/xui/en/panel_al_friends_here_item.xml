@@ -57,12 +57,23 @@
         top="1"
         width="54" />
 
-    <line_editor
+    <text
         follows="left|top|right"
+        font="SansSerifSmall"
         height="18"
         left="4"
-        max_length_chars="63"
         name="contact_alias"
-        top="25"
-        right="-4" />
+        top="24"
+        right="-70"
+        use_ellipses="true" />
+
+    <button
+        follows="right|top"
+        height="20"
+        label="Edit"
+        label_selected="Edit"
+        name="contact_edit_btn"
+        right="-4"
+        top="23"
+        width="62" />
 </panel>

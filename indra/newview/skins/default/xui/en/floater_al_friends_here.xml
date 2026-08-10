@@ -22,6 +22,15 @@
     <button
         follows="top|right"
         height="22"
+        label="Aliases"
+        label_selected="Aliases"
+        name="aliases_btn"
+        top="6"
+        right="-86"
+        width="74" />
+    <button
+        follows="top|right"
+        height="22"
         label="Refresh"
         label_selected="Refresh"
         name="refresh_btn"
@@ -36,7 +45,7 @@
         left="8"
         name="status_text"
         top="10"
-        width="200" />
+        width="140" />
 
     <line_editor
         follows="top|left|right"

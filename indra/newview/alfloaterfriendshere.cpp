@@ -60,13 +60,14 @@ public:
     {
         mNameText = getChild<LLTextBox>("contact_name");
         mTimeText = getChild<LLTextBox>("time_here");
-        mAliasEdit = getChild<LLLineEditor>("contact_alias");
+        mAliasText = getChild<LLTextBox>("contact_alias");
         mGreetBtn = getChild<LLButton>("greet_btn");
         mGreetCombo = getChild<LLComboBox>("greet_type");
 
-        mAliasEdit->setCommitCallback(boost::bind(&ALFriendsHereItem::onAliasEdited, this));
-        mAliasEdit->setCommitOnFocusLost(true);
+        updateAliasDisplay();
+
         mGreetBtn->setClickedCallback(boost::bind(&ALFriendsHereItem::onGreet, this));
+        getChild<LLButton>("contact_edit_btn")->setClickedCallback(boost::bind(&ALFriendsHereItem::onClickEditAlias, this));
         return TRUE;
     }
 
@@ -103,14 +104,9 @@ public:
 
     std::string getGreetingName() const
     {
-        const std::string alias = mAliasEdit->getText();
+        const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
+        const std::string alias = aliases[mAvatarID.asString()].asString();
         return alias.empty() ? mAvatarName : alias;
-    }
-
-    void setAlias(const std::string& alias)
-    {
-        mAliasEdit->setText(alias);
-        updateNameText();
     }
 
     bool isRecentArrival() const
@@ -158,26 +154,31 @@ private:
         send_chat_from_viewer(message, CHAT_TYPE_NORMAL, 0);
     }
 
-    void onAliasEdited()
+    void onClickEditAlias()
     {
-        LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
-        aliases[mAvatarID.asString()] = mAliasEdit->getText();
-        gSavedPerAccountSettings.setLLSD(AL_CLUB_INVITE_ALIASES_SETTING, aliases);
-        updateNameText();
+        LLFloaterReg::showInstance("aliases", LLSD().with("avatar_id", mAvatarID));
     }
 
     void updateNameText()
     {
-        std::string label = mAliasEdit ? mAliasEdit->getText() : std::string();
-        if (label.empty())
+        std::string label = mAvatarName;
+        if (!mAvatarName.empty() && !mAccountName.empty())
         {
-            label = mAvatarName;
-            if (!mAvatarName.empty() && !mAccountName.empty())
-            {
-                label += " (" + mAccountName + ")";
-            }
+            label += " (" + mAccountName + ")";
         }
         mNameText->setText(label);
+        updateAliasDisplay();
+    }
+
+    void updateAliasDisplay()
+    {
+        if (!mAliasText)
+        {
+            return;
+        }
+        const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
+        const std::string alias = aliases[mAvatarID.asString()].asString();
+        mAliasText->setText(alias.empty() ? mAvatarName : alias);
     }
 
     void updateNameColor()
@@ -190,7 +191,7 @@ private:
 
     LLTextBox*    mNameText = nullptr;
     LLTextBox*    mTimeText = nullptr;
-    LLLineEditor* mAliasEdit = nullptr;
+    LLTextBox*    mAliasText = nullptr;
     LLButton*     mGreetBtn = nullptr;
     LLComboBox*   mGreetCombo = nullptr;
 
@@ -219,6 +220,7 @@ bool ALFloaterFriendsHere::postBuild()
     mStatusText = getChild<LLTextBox>("status_text");
     mRefreshBtn = getChild<LLButton>("refresh_btn");
     mRefreshBtn->setClickedCallback(boost::bind(&ALFloaterFriendsHere::refreshFriendsList, this));
+    getChild<LLButton>("aliases_btn")->setClickedCallback(boost::bind(&ALFloaterFriendsHere::onClickAliases, this));
     mCustomGreetingEdit = getChild<LLLineEditor>("custom_greeting");
     mCustomGreetingEdit->setText(gSavedPerAccountSettings.getString(AL_FRIENDS_HERE_CUSTOM_GREETING_SETTING));
     mCustomGreetingEdit->setCommitCallback(boost::bind(&ALFloaterFriendsHere::onCustomGreetingCommit, this));
@@ -359,10 +361,6 @@ void ALFloaterFriendsHere::refreshFriendsList()
             item = new ALFriendsHereItem(id);
             mFriendList->addItem(item, LLSD(id));
 
-            const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
-            const std::string alias = aliases[id.asString()].asString();
-            item->setAlias(alias);
-
             auto conn = LLAvatarNameCache::get(id,
                 boost::bind(&ALFloaterFriendsHere::onAvatarNameLoaded, this, _1, _2));
             mAvatarNameConnections.push_back(conn);
@@ -372,6 +370,11 @@ void ALFloaterFriendsHere::refreshFriendsList()
 
     mStatusText->setText(present_sorted.empty() ? getString("FriendsHereNoFriends")
                                                 : getString("FriendsHereStatus"));
+}
+
+void ALFloaterFriendsHere::onClickAliases()
+{
+    LLFloaterReg::showInstance("aliases");
 }
 
 void ALFloaterFriendsHere::onCustomGreetingCommit()
