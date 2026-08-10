@@ -39,6 +39,7 @@ private:
     void onObjectSelected(const std::deque<LLFolderViewItem*>& items, bool user_action);
     void onClickSend();
     void onClickStop();
+    void onClickAliases();
     void onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname);
 
     void populateContacts();

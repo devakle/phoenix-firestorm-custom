@@ -62,7 +62,6 @@ public:
     ALClubInviteContactItem(const LLUUID& avatar_id);
 
     bool postBuild() override;
-    bool handleKeyHere(KEY key, MASK mask) override;
 
     const LLUUID& getAvatarID() const { return mAvatarID; }
     bool isEnabled() const;
@@ -71,16 +70,18 @@ public:
     void setOnCooldown(bool cooldown);
 
 private:
-    void onAliasEdited();
+    void onClickEditAlias();
     void onNeverIMChanged();
     void updateEnabledControls();
-    bool focusSiblingAlias(bool forward);
+    void updateAliasDisplay();
 
     LLUUID      mAvatarID;
     LLCheckBoxCtrl* mEnabledCheck = nullptr;
     LLTextBox*  mNameText = nullptr;
-    LLLineEditor* mAliasEdit = nullptr;
+    LLTextBox*  mAliasText = nullptr;
+    LLButton*   mEditBtn = nullptr;
     LLCheckBoxCtrl* mNeverIMCheck = nullptr;
+    std::string mAvatarName;
     bool        mOnCooldown = false;
     bool        mNeverIM = false;
 };
@@ -96,16 +97,12 @@ bool ALClubInviteContactItem::postBuild()
 {
     mEnabledCheck = getChild<LLCheckBoxCtrl>("contact_enabled");
     mNameText = getChild<LLTextBox>("contact_name");
-    mAliasEdit = getChild<LLLineEditor>("contact_alias");
+    mAliasText = getChild<LLTextBox>("contact_alias");
+    mEditBtn = getChild<LLButton>("contact_edit_btn");
     mNeverIMCheck = getChild<LLCheckBoxCtrl>("contact_no_im");
     setValue(LLSD(mAvatarID));
 
-    const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
-    const std::string saved_alias = aliases[mAvatarID.asString()].asString();
-    if (!saved_alias.empty())
-    {
-        mAliasEdit->setText(saved_alias);
-    }
+    updateAliasDisplay();
 
     const LLSD never_im = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_NEVER_IM_SETTING);
     mNeverIM = never_im[mAvatarID.asString()].asBoolean();
@@ -116,91 +113,16 @@ bool ALClubInviteContactItem::postBuild()
     }
     updateEnabledControls();
 
-    mAliasEdit->setCommitCallback(boost::bind(&ALClubInviteContactItem::onAliasEdited, this));
-    mAliasEdit->setCommitOnFocusLost(true);
+    if (mEditBtn)
+    {
+        mEditBtn->setCommitCallback(boost::bind(&ALClubInviteContactItem::onClickEditAlias, this));
+    }
     return true;
 }
 
-bool ALClubInviteContactItem::handleKeyHere(KEY key, MASK mask)
+void ALClubInviteContactItem::onClickEditAlias()
 {
-    if (key == KEY_TAB && mAliasEdit && mAliasEdit->hasFocus())
-    {
-        const bool forward = (mask == MASK_NONE);
-        if (focusSiblingAlias(forward))
-        {
-            return true;
-        }
-    }
-    return LLPanel::handleKeyHere(key, mask);
-}
-
-bool ALClubInviteContactItem::focusSiblingAlias(bool forward)
-{
-    LLFlatListView* flat_list = nullptr;
-    for (LLView* parent = getParent(); parent; parent = parent->getParent())
-    {
-        flat_list = dynamic_cast<LLFlatListView*>(parent);
-        if (flat_list)
-        {
-            break;
-        }
-    }
-    if (!flat_list)
-    {
-        return false;
-    }
-
-    std::vector<LLPanel*> items;
-    flat_list->getItems(items);
-
-    S32 current = -1;
-    for (S32 i = 0; i < (S32)items.size(); ++i)
-    {
-        if (items[i] == this)
-        {
-            current = i;
-            break;
-        }
-    }
-    if (current < 0)
-    {
-        return false;
-    }
-
-    const S32 count = (S32)items.size();
-    S32 next = forward ? current + 1 : current - 1;
-    // skip the current item if it is the only one; otherwise wrap around
-    if (next >= count)
-    {
-        next = 0;
-    }
-    else if (next < 0)
-    {
-        next = count - 1;
-    }
-    if (next == current)
-    {
-        return false;
-    }
-
-    ALClubInviteContactItem* target_item = dynamic_cast<ALClubInviteContactItem*>(items[next]);
-    if (!(target_item && target_item->mAliasEdit))
-    {
-        return false;
-    }
-
-    // make sure the incoming item is visible before stealing focus
-    flat_list->scrollToShowRect(target_item->getRect());
-    target_item->mAliasEdit->setFocus(true);
-    target_item->mAliasEdit->selectAll();
-    return true;
-}
-
-void ALClubInviteContactItem::onAliasEdited()
-{
-    LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
-    aliases[mAvatarID.asString()] = mAliasEdit->getText();
-    gSavedPerAccountSettings.setLLSD(AL_CLUB_INVITE_ALIASES_SETTING, aliases);
+    LLFloaterReg::showInstance("aliases", LLSD().with("avatar_id", mAvatarID));
 }
 
 bool ALClubInviteContactItem::isEnabled() const
@@ -211,6 +133,7 @@ bool ALClubInviteContactItem::isEnabled() const
 void ALClubInviteContactItem::setAvatarName(const std::string& display_name,
                                             const std::string& account_name)
 {
+    mAvatarName = display_name;
     std::string label = display_name;
     if (!display_name.empty() && !account_name.empty())
     {
@@ -220,15 +143,25 @@ void ALClubInviteContactItem::setAvatarName(const std::string& display_name,
     {
         mNameText->setText(label);
     }
-    if (mAliasEdit->getText().empty() && !display_name.empty())
-    {
-        mAliasEdit->setText(display_name);
-    }
+    updateAliasDisplay();
 }
 
 std::string ALClubInviteContactItem::getAlias() const
 {
-    return mAliasEdit ? mAliasEdit->getText() : std::string();
+    const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
+    const std::string alias = aliases[mAvatarID.asString()].asString();
+    return alias.empty() ? mAvatarName : alias;
+}
+
+void ALClubInviteContactItem::updateAliasDisplay()
+{
+    if (!mAliasText)
+    {
+        return;
+    }
+    const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
+    const std::string alias = aliases[mAvatarID.asString()].asString();
+    mAliasText->setText(alias.empty() ? mAvatarName : alias);
 }
 
 void ALClubInviteContactItem::setOnCooldown(bool cooldown)
@@ -284,6 +217,7 @@ bool ALFloaterClubInvite::postBuild()
 
     mRefreshBtn = getChild<LLButton>("refresh_btn");
     mRefreshBtn->setClickedCallback(boost::bind(&ALFloaterClubInvite::onClickRefresh, this));
+    getChild<LLButton>("aliases_btn")->setClickedCallback(boost::bind(&ALFloaterClubInvite::onClickAliases, this));
 
     mCooldownSpin->setCommitCallback(boost::bind(&ALFloaterClubInvite::onSendDelayCommit, this));
     mResendSpin->setCommitCallback(boost::bind(&ALFloaterClubInvite::onResendCooldownCommit, this));
@@ -361,6 +295,11 @@ void ALFloaterClubInvite::populateContacts()
 void ALFloaterClubInvite::onClickRefresh()
 {
     populateContacts();
+}
+
+void ALFloaterClubInvite::onClickAliases()
+{
+    LLFloaterReg::showInstance("aliases");
 }
 
 void ALFloaterClubInvite::onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname)

@@ -53,13 +53,25 @@
         Alias
     </text>
 
-    <line_editor
+    <text
         follows="left|top|right"
+        font="SansSerifSmall"
         height="18"
         layout="topleft"
         left_pad="4"
-        max_length_chars="63"
         name="contact_alias"
         top="2"
-        right="-2" />
+        right="-72"
+        use_ellipses="true" />
+
+    <button
+        follows="right|top"
+        height="20"
+        label="Edit"
+        label_selected="Edit"
+        layout="topleft"
+        right="-2"
+        name="contact_edit_btn"
+        top="1"
+        width="66" />
 </panel>

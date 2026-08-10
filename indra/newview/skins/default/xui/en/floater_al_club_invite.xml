@@ -219,6 +219,16 @@ Join [club]! Club SLURL: [slurl] -- [name]
             <button
                 follows="right|top"
                 height="20"
+                label="Aliases"
+                label_selected="Aliases"
+                layout="topleft"
+                left="-204"
+                name="aliases_btn"
+                top="0"
+                width="76" />
+            <button
+                follows="right|top"
+                height="20"
                 label="Refresh"
                 label_selected="Refresh"
                 layout="topleft"
