@@ -6,7 +6,7 @@
         left="0"
         name="friends_here_item"
         top="0"
-        width="308">
+        width="356">
 
     <text
         follows="left|top|right"
@@ -17,7 +17,7 @@
         name="contact_name"
         top="3"
         use_ellipses="true"
-        width="112" />
+        width="130" />
 
     <text
         follows="left|top"
