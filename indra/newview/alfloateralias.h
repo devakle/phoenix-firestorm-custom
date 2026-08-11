@@ -23,6 +23,7 @@ class LLTextBox;
 class LLFlatListView;
 class LLButton;
 class LLAvatarName;
+class LLFilterEditor;
 
 class ALFloaterAliases final : public LLFloater
 {
@@ -36,12 +37,16 @@ public:
 private:
     void populateList();
     void onClickRefresh();
+    void onClickSave();
     void onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname);
     void focusContact(const LLUUID& avatar_id);
+    void onFilterEdit(const std::string& search_string);
 
     LLFlatListView* mAliasList = nullptr;
     LLButton*       mRefreshBtn = nullptr;
+    LLButton*       mSaveBtn = nullptr;
     LLTextBox*      mStatusText = nullptr;
+    LLFilterEditor* mFilterEditor = nullptr;
 
     std::vector<boost::signals2::connection> mAvatarNameConnections;
 };

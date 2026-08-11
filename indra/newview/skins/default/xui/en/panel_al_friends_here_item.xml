@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel
         follows="top|left|right"
-        height="44"
+        height="66"
         layout="topleft"
         left="0"
         name="friends_here_item"
@@ -76,4 +76,26 @@
         right="-4"
         top="23"
         width="62" />
+
+    <text
+        follows="left|top"
+        font="SansSerifSmall"
+        height="18"
+        layout="topleft"
+        left="4"
+        name="contact_custom_greeting_label"
+        top="46"
+        width="50"
+        value="Greeting:" />
+
+    <line_editor
+        follows="left|top|right"
+        height="18"
+        layout="topleft"
+        left_pad="8"
+        max_length_chars="255"
+        name="contact_custom_greeting"
+        tool_tip="Custom greeting message for this resident. If empty, uses the default."
+        top="45"
+        right="-4" />
 </panel>

@@ -50,6 +50,19 @@ static const std::string AL_CLUB_INVITE_SEND_DELAY_SETTING("ALClubInviteSendDela
 static const std::string AL_CLUB_INVITE_RESEND_COOLDOWN_SETTING("ALClubInviteResendCooldownMinutes");
 static const F32          DEFAULT_CLUB_INVITE_RESEND_COOLDOWN_MINUTES(30.f);
 
+static void setTooltipIfTruncated(LLTextBox* text_box, const std::string& full_text)
+{
+    if (!text_box)
+    {
+        return;
+    }
+
+    const F32 text_width = text_box->getFont() ? text_box->getFont()->getWidthF32(full_text.c_str())
+                                               : 0.f;
+    const F32 available_width = (F32)text_box->getRect().getWidth();
+    text_box->setToolTip(text_width > available_width ? full_text : LLStringUtil::null);
+}
+
 static F32 getSavedF32Setting(const std::string& name, F32 fallback)
 {
     LLControlVariablePtr control = gSavedPerAccountSettings.getControl(name);
@@ -142,6 +155,7 @@ void ALClubInviteContactItem::setAvatarName(const std::string& display_name,
     if (mNameText)
     {
         mNameText->setText(label);
+        setTooltipIfTruncated(mNameText, label);
     }
     updateAliasDisplay();
 }
@@ -161,7 +175,9 @@ void ALClubInviteContactItem::updateAliasDisplay()
     }
     const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
     const std::string alias = aliases[mAvatarID.asString()].asString();
-    mAliasText->setText(alias.empty() ? mAvatarName : alias);
+    const std::string label = alias.empty() ? mAvatarName : alias;
+    mAliasText->setText(label);
+    setTooltipIfTruncated(mAliasText, label);
 }
 
 void ALClubInviteContactItem::setOnCooldown(bool cooldown)
@@ -303,6 +319,11 @@ void ALFloaterClubInvite::onClickRefresh()
 void ALFloaterClubInvite::onClickAliases()
 {
     LLFloaterReg::showInstance("aliases");
+}
+
+void ALFloaterClubInvite::refreshForAliasChange()
+{
+    populateContacts();
 }
 
 void ALFloaterClubInvite::onAvatarNameLoaded(const LLUUID& agent_id, const LLAvatarName& avname)

@@ -19,7 +19,7 @@
         use_ellipses="true"
         width="258" />
 
-    <line_editor
+    <al_alias_line_editor
         follows="left|top|right"
         height="18"
         layout="topleft"

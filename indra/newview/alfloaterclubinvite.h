@@ -34,6 +34,7 @@ public:
     bool postBuild() override;
     void onOpen(const LLSD& key) override;
     void onClose(bool app_quitting) override;
+    void refreshForAliasChange();
 
 private:
     void onObjectSelected(const std::deque<LLFolderViewItem*>& items, bool user_action);

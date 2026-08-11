@@ -29,6 +29,7 @@
 #include "llviewermessage.h"
 #include "llworld.h"
 #include "llviewerparcelmgr.h"
+#include "llparcel.h"
 #include "llviewerregion.h"
 #include "llavatarnamecache.h"
 #include "llviewercontrol.h"
@@ -36,8 +37,22 @@
 // same setting the club invite floater persists into (ALClubInviteAliases)
 static const std::string AL_CLUB_INVITE_ALIASES_SETTING("ALClubInviteAliases");
 static const std::string AL_FRIENDS_HERE_CUSTOM_GREETING_SETTING("ALFriendsHereCustomGreeting");
+static const std::string AL_FRIENDS_HERE_CUSTOM_GREETINGS_SETTING("ALFriendsHereCustomGreetings");
 static const std::string TOKEN_NAME("[name]");
 static const std::string TOKEN_ALIAS("[alias]");
+
+static void setTooltipIfTruncated(LLTextBox* text_box, const std::string& full_text)
+{
+    if (!text_box)
+    {
+        return;
+    }
+
+    const F32 text_width = text_box->getFont() ? text_box->getFont()->getWidthF32(full_text.c_str())
+                                               : 0.f;
+    const F32 available_width = (F32)text_box->getRect().getWidth();
+    text_box->setToolTip(text_width > available_width ? full_text : LLStringUtil::null);
+}
 
 // treat as "recently arrived" when present for less than this many seconds
 static const F32 kRecentSeconds = 5.f * 60.f;
@@ -63,8 +78,18 @@ public:
         mAliasText = getChild<LLTextBox>("contact_alias");
         mGreetBtn = getChild<LLButton>("greet_btn");
         mGreetCombo = getChild<LLComboBox>("greet_type");
+        mCustomGreetingEdit = getChild<LLLineEditor>("contact_custom_greeting");
 
         updateAliasDisplay();
+
+        const LLSD greetings = gSavedPerAccountSettings.getLLSD(AL_FRIENDS_HERE_CUSTOM_GREETINGS_SETTING);
+        const std::string saved_greeting = greetings[mAvatarID.asString()].asString();
+        if (mCustomGreetingEdit)
+        {
+            mCustomGreetingEdit->setText(saved_greeting);
+            mCustomGreetingEdit->setCommitCallback(boost::bind(&ALFriendsHereItem::onCustomGreetingCommit, this));
+            mCustomGreetingEdit->setCommitOnFocusLost(true);
+        }
 
         mGreetBtn->setClickedCallback(boost::bind(&ALFriendsHereItem::onGreet, this));
         getChild<LLButton>("contact_edit_btn")->setClickedCallback(boost::bind(&ALFriendsHereItem::onClickEditAlias, this));
@@ -120,12 +145,22 @@ private:
     {
         const std::string name = getGreetingName();
         std::string message;
-        const std::string custom = gSavedPerAccountSettings.getString(AL_FRIENDS_HERE_CUSTOM_GREETING_SETTING);
-        if (!custom.empty())
+        const std::string mode = mGreetCombo ? mGreetCombo->getValue().asString() : "greet";
+
+        std::string resident_custom = mCustomGreetingEdit ? mCustomGreetingEdit->getText() : "";
+        if (resident_custom.empty())
         {
-            // Custom greeting template overrides the presets. [name]/[alias]
-            // are replaced with the contact's greeting name.
-            message = custom;
+            const LLSD greetings = gSavedPerAccountSettings.getLLSD(AL_FRIENDS_HERE_CUSTOM_GREETINGS_SETTING);
+            resident_custom = greetings[mAvatarID.asString()].asString();
+        }
+
+        if (mode == "wb")
+        {
+            message = "welcome back " + name + "! :)";
+        }
+        else if (!resident_custom.empty())
+        {
+            message = resident_custom;
             auto substitute = [&message](const std::string& token, const std::string& value)
             {
                 size_t pos = 0;
@@ -140,10 +175,23 @@ private:
         }
         else
         {
-            const std::string mode = mGreetCombo ? mGreetCombo->getValue().asString() : "greet";
-            if (mode == "wb")
+            const std::string custom = gSavedPerAccountSettings.getString(AL_FRIENDS_HERE_CUSTOM_GREETING_SETTING);
+            if (!custom.empty())
             {
-                message = "welcome back " + name + "! :)";
+                // Custom greeting template overrides the presets. [name]/[alias]
+                // are replaced with the contact's greeting name.
+                message = custom;
+                auto substitute = [&message](const std::string& token, const std::string& value)
+                {
+                    size_t pos = 0;
+                    while ((pos = message.find(token, pos)) != std::string::npos)
+                    {
+                        message.replace(pos, token.length(), value);
+                        pos += value.length();
+                    }
+                };
+                substitute(TOKEN_NAME, name);
+                substitute(TOKEN_ALIAS, name);
             }
             else
             {
@@ -152,11 +200,33 @@ private:
             }
         }
         send_chat_from_viewer(message, CHAT_TYPE_NORMAL, 0);
+
+        ALFloaterFriendsHere* friends_here = LLFloaterReg::findTypedInstance<ALFloaterFriendsHere>("friends_here");
+        if (friends_here)
+        {
+            if (mode == "wb")
+            {
+                friends_here->onWelcomeBackSent(mAvatarID);
+            }
+            else
+            {
+                friends_here->onGreetSent(mAvatarID);
+            }
+        }
+        updateNameColor();
     }
 
     void onClickEditAlias()
     {
         LLFloaterReg::showInstance("aliases", LLSD().with("avatar_id", mAvatarID));
+    }
+
+    void onCustomGreetingCommit()
+    {
+        if (!mCustomGreetingEdit) return;
+        LLSD greetings = gSavedPerAccountSettings.getLLSD(AL_FRIENDS_HERE_CUSTOM_GREETINGS_SETTING);
+        greetings[mAvatarID.asString()] = mCustomGreetingEdit->getText();
+        gSavedPerAccountSettings.setLLSD(AL_FRIENDS_HERE_CUSTOM_GREETINGS_SETTING, greetings);
     }
 
     void updateNameText()
@@ -167,6 +237,7 @@ private:
             label += " (" + mAccountName + ")";
         }
         mNameText->setText(label);
+        setTooltipIfTruncated(mNameText, label);
         updateAliasDisplay();
     }
 
@@ -178,14 +249,34 @@ private:
         }
         const LLSD aliases = gSavedPerAccountSettings.getLLSD(AL_CLUB_INVITE_ALIASES_SETTING);
         const std::string alias = aliases[mAvatarID.asString()].asString();
-        mAliasText->setText(alias.empty() ? mAvatarName : alias);
+        const std::string label = alias.empty() ? mAvatarName : alias;
+        mAliasText->setText(label);
+        setTooltipIfTruncated(mAliasText, label);
     }
 
     void updateNameColor()
     {
-        const LLUIColor color = isRecentArrival()
-            ? LLUIColorTable::instance().getColor("Green")
-            : LLUIColorTable::instance().getColor("White");
+        LLUIColor color = LLUIColorTable::instance().getColor("White");
+        ALFloaterFriendsHere* friends_here = LLFloaterReg::findTypedInstance<ALFloaterFriendsHere>("friends_here");
+        if (friends_here)
+        {
+            if (friends_here->needsWelcomeBack(mAvatarID))
+            {
+                color = LLUIColorTable::instance().getColor("Yellow");
+            }
+            else if (friends_here->hasBeenGreeted(mAvatarID))
+            {
+                color = LLUIColorTable::instance().getColor("White");
+            }
+            else if (isRecentArrival())
+            {
+                color = LLUIColorTable::instance().getColor("Green");
+            }
+        }
+        else if (isRecentArrival())
+        {
+            color = LLUIColorTable::instance().getColor("Green");
+        }
         mNameText->setColor(color);
     }
 
@@ -194,6 +285,7 @@ private:
     LLTextBox*    mAliasText = nullptr;
     LLButton*     mGreetBtn = nullptr;
     LLComboBox*   mGreetCombo = nullptr;
+    LLLineEditor* mCustomGreetingEdit = nullptr;
 
     LLUUID      mAvatarID;
     std::string mAvatarName;
@@ -255,6 +347,22 @@ void ALFloaterFriendsHere::refreshFriendsList()
     }
     const LLUUID scope_region_id = agent_region->getRegionID();
 
+    S32 current_parcel_id = -1;
+    LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+    if (agent_parcel)
+    {
+        current_parcel_id = agent_parcel->getLocalID();
+    }
+
+    if (mCurrentParcelID != current_parcel_id || mCurrentRegionID != scope_region_id)
+    {
+        mCurrentParcelID = current_parcel_id;
+        mCurrentRegionID = scope_region_id;
+        mGreetedAvatars.clear();
+        mLeftAfterGreeting.clear();
+        mNeedsWelcomeBack.clear();
+    }
+
     std::vector<LLUUID> present;
     arrival_time_map_t arrivals_now;
 
@@ -289,6 +397,11 @@ void ALFloaterFriendsHere::refreshFriendsList()
         else
         {
             arrival = LLDate::now().secondsSinceEpoch();
+            if (mLeftAfterGreeting.count(id))
+            {
+                mNeedsWelcomeBack.insert(id);
+                mLeftAfterGreeting.erase(id);
+            }
         }
         arrivals_now[id] = arrival;
     }
@@ -298,6 +411,12 @@ void ALFloaterFriendsHere::refreshFriendsList()
     {
         if (arrivals_now.find(it->first) == arrivals_now.end())
         {
+            const LLUUID& id = it->first;
+            if (mGreetedAvatars.count(id))
+            {
+                mLeftAfterGreeting.insert(id);
+                mNeedsWelcomeBack.erase(id);
+            }
             mArrivalTimes.erase(it++);
         }
         else
@@ -375,6 +494,11 @@ void ALFloaterFriendsHere::refreshFriendsList()
 void ALFloaterFriendsHere::onClickAliases()
 {
     LLFloaterReg::showInstance("aliases");
+}
+
+void ALFloaterFriendsHere::refreshForAliasChange()
+{
+    refreshFriendsList();
 }
 
 void ALFloaterFriendsHere::onCustomGreetingCommit()

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+        can_close="true"
+        can_drag_on_left="false"
+        can_minimize="true"
+        enable_hide_btn="false"
+        height="500"
+        min_height="300"
+        min_width="380"
+        name="parcel_im"
+        title="Parcel IM Sender"
+        width="420">
+
+    <!-- Top Label -->
+    <text
+        follows="top|left|right"
+        font="SansSerifSmall"
+        height="18"
+        left="8"
+        name="status_text"
+        top="10"
+        width="260">
+        Send custom IM messages to non-friend residents in the current parcel.
+    </text>
+
+    <!-- Message Label and Text Editor -->
+    <text
+        follows="top|left"
+        font="SansSerifSmall"
+        height="14"
+        left="8"
+        name="message_label"
+        top="32"
+        width="100">
+        IM Message Template:
+    </text>
+    <text_editor
+        follows="top|left|right"
+        height="80"
+        left="8"
+        max_length="1023"
+        name="im_message_text"
+        right="-8"
+        top_pad="4"
+        word_wrap="true"
+        tool_tip="Use [name] or [alias] to substitute the contact's name/alias." />
+
+    <!-- Configuration Area -->
+    <layout_stack
+        follows="top|left|right"
+        height="24"
+        layout="topleft"
+        left="8"
+        name="config_stack"
+        top_pad="8"
+        right="-8">
+        <layout_panel
+            height="24"
+            layout="topleft"
+            name="interval_panel"
+            width="190">
+            <text
+                follows="left|top"
+                font="SansSerifSmall"
+                height="16"
+                left="0"
+                name="interval_label"
+                top="4"
+                width="110">
+                Pacing Delay (s):
+            </text>
+            <spinner
+                follows="left|top"
+                height="20"
+                left_pad="4"
+                min_val="5"
+                max_val="300"
+                name="send_interval_spinner"
+                top="2"
+                width="60" />
+        </layout_panel>
+        <layout_panel
+            height="24"
+            layout="topleft"
+            name="cooldown_panel"
+            width="190">
+            <text
+                follows="left|top"
+                font="SansSerifSmall"
+                height="16"
+                left="10"
+                name="cooldown_label"
+                top="4"
+                width="110">
+                Resend Cooldown (m):
+            </text>
+            <spinner
+                follows="left|top"
+                height="20"
+                left_pad="4"
+                min_val="1"
+                max_val="1440"
+                name="cooldown_spinner"
+                top="2"
+                width="60" />
+        </layout_panel>
+    </layout_stack>
+
+    <!-- Resident List Section -->
+    <flat_list_view
+        allow_select="false"
+        follows="all"
+        height="260"
+        item_pad="2"
+        keep_scroll_pos="true"
+        layout="topleft"
+        left="6"
+        multi_select="false"
+        name="resident_list"
+        top_pad="8"
+        right="-6"
+        bottom="-40">
+        <flat_list_view.no_items_text
+            name="no_items_msg"
+            value="No eligible residents in the parcel." />
+    </flat_list_view>
+
+    <!-- Bottom Actions -->
+    <button
+        follows="bottom|right"
+        height="22"
+        label="Refresh"
+        label_selected="Refresh"
+        name="refresh_btn"
+        bottom="-6"
+        right="-82"
+        width="70" />
+    <button
+        follows="bottom|right"
+        height="22"
+        label="Send"
+        label_selected="Send"
+        name="send_btn"
+        bottom="-6"
+        right="-6"
+        width="70" />
+    <button
+        follows="bottom|left"
+        height="22"
+        label="Toggle All"
+        label_selected="Toggle All"
+        name="toggle_all_btn"
+        bottom="-6"
+        left="6"
+        width="80" />
+
+</floater>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel
+    follows="top|left|right"
+    height="22"
+    layout="topleft"
+    left="0"
+    name="parcel_im_contact_item"
+    top="0"
+    width="380">
+
+    <check_box
+        follows="left|top"
+        height="18"
+        layout="topleft"
+        left="4"
+        name="contact_enabled"
+        top="2"
+        width="18" />
+
+    <text
+        follows="left|top|right"
+        font="SansSerifSmall"
+        height="18"
+        layout="topleft"
+        left_pad="4"
+        name="contact_name"
+        top="2"
+        use_ellipses="true"
+        width="220" />
+
+    <text
+        follows="right|top"
+        font="SansSerifSmall"
+        height="18"
+        layout="topleft"
+        name="contact_status"
+        top="2"
+        right="-4"
+        width="110"
+        halign="right" />
+
+</panel>

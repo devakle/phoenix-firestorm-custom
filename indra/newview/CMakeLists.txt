@@ -91,6 +91,7 @@ set(viewer_SOURCE_FILES
     alfloaterclubinvite.cpp
     alfloaterfriendshere.cpp
     alfloaterregiontracker.cpp
+    alfloaterparcelim.cpp
     animationexplorer.cpp
     ao.cpp
     aoengine.cpp
@@ -952,6 +953,7 @@ set(viewer_HEADER_FILES
     alfloaterclubinvite.h
     alfloaterfriendshere.h
     alfloaterregiontracker.h
+    alfloaterparcelim.h
     animationexplorer.h
     ao.h
     aoengine.h

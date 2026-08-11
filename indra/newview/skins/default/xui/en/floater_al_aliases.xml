@@ -24,6 +24,15 @@
         top="6"
         right="-6"
         width="70" />
+    <button
+        follows="top|right"
+        height="22"
+        label="Save"
+        label_selected="Save"
+        name="save_btn"
+        top="6"
+        right="-82"
+        width="70" />
 
     <text
         follows="top|left|right"
@@ -32,7 +41,17 @@
         left="8"
         name="status_text"
         top="10"
-        width="360" />
+        width="280" />
+
+    <filter_editor
+        follows="top|left|right"
+        height="20"
+        label="Filter contacts"
+        layout="topleft"
+        left="6"
+        name="alias_filter"
+        top="34"
+        right="-6" />
 
     <flat_list_view
         allow_select="false"
@@ -44,7 +63,7 @@
         left="6"
         multi_select="false"
         name="alias_list"
-        top="34"
+        top="58"
         right="-6"
         bottom="-6">
         <flat_list_view.no_items_text
