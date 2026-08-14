@@ -6,11 +6,11 @@
         enable_hide_btn="false"
         height="360"
         min_height="220"
-        min_width="320"
+        min_width="330"
         name="friends_here"
         title="Friends Here"
         help_topic="friendshere"
-        width="320">
+        width="380">
 
     <floater.string name="FriendsHereStatus">
         Friends in your parcel, ordered by arrival time.
@@ -19,6 +19,15 @@
         No friends in your parcel right now.
     </floater.string>
 
+    <button
+        follows="top|right"
+        height="22"
+        label="Aliases"
+        label_selected="Aliases"
+        name="aliases_btn"
+        top="6"
+        right="-86"
+        width="74" />
     <button
         follows="top|right"
         height="22"
@@ -36,7 +45,17 @@
         left="8"
         name="status_text"
         top="10"
-        width="200" />
+        width="140" />
+
+    <line_editor
+        follows="top|left|right"
+        height="20"
+        left="8"
+        max_length_chars="127"
+        name="custom_greeting"
+        right="-8"
+        tool_tip="Leave empty for the default Greet / Welcome back greetings. Use [name] (or [alias]) to insert each contact's name."
+        top="30" />
 
     <flat_list_view
         allow_select="false"
@@ -48,7 +67,7 @@
         left="6"
         multi_select="false"
         name="friend_list"
-        top="34"
+        top="56"
         right="-6"
         bottom="-6">
         <flat_list_view.no_items_text

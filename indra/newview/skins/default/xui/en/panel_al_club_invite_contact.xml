@@ -6,7 +6,7 @@
         left="0"
         name="club_invite_contact_item"
         top="0"
-        width="418">
+        width="536">
 
     <check_box
         follows="left|top"
@@ -23,31 +23,55 @@
         font="SansSerifSmall"
         height="18"
         layout="topleft"
-        left="24"
+        left="22"
         name="contact_name"
         top="2"
         use_ellipses="true"
-        width="150" />
+        width="268" />
+
+    <check_box
+        follows="left|top"
+        height="16"
+        initial_value="false"
+        label="No IM"
+        label_width="36"
+        layout="topleft"
+        left_pad="8"
+        name="contact_no_im"
+        top="3"
+        width="60" />
 
     <text
         follows="left|top|right"
         font="SansSerifSmall"
         height="18"
         layout="topleft"
-        left_pad="4"
+        left_pad="6"
         name="contact_alias_label"
         top="2"
-        width="34">
+        width="30">
         Alias
     </text>
 
-    <line_editor
+    <text
         follows="left|top|right"
+        font="SansSerifSmall"
         height="18"
         layout="topleft"
-        left_pad="4"
-        max_length_chars="63"
+        left_pad="6"
         name="contact_alias"
         top="2"
-        right="-2" />
+        right="-76"
+        use_ellipses="true" />
+
+    <button
+        follows="right|top"
+        height="20"
+        label="Edit"
+        label_selected="Edit"
+        layout="topleft"
+        right="-2"
+        name="contact_edit_btn"
+        top="1"
+        width="70" />
 </panel>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+        can_close="true"
+        can_drag_on_left="false"
+        can_minimize="true"
+        enable_hide_btn="false"
+        height="460"
+        min_height="240"
+        min_width="420"
+        name="aliases"
+        title="Aliases"
+        width="520">
+
+    <floater.string name="AliasesStatus">
+        Set an alias for any friend here. The club invitation and friends here floaters share these aliases.
+    </floater.string>
+
+    <button
+        follows="top|right"
+        height="22"
+        label="Refresh"
+        label_selected="Refresh"
+        name="refresh_btn"
+        top="6"
+        right="-6"
+        width="70" />
+    <button
+        follows="top|right"
+        height="22"
+        label="Save"
+        label_selected="Save"
+        name="save_btn"
+        top="6"
+        right="-82"
+        width="70" />
+
+    <text
+        follows="top|left|right"
+        font="SansSerifSmall"
+        height="18"
+        left="8"
+        name="status_text"
+        top="10"
+        width="280" />
+
+    <filter_editor
+        follows="top|left|right"
+        height="20"
+        label="Filter contacts"
+        layout="topleft"
+        left="6"
+        name="alias_filter"
+        top="34"
+        right="-6" />
+
+    <flat_list_view
+        allow_select="false"
+        follows="all"
+        height="280"
+        item_pad="2"
+        keep_scroll_pos="true"
+        layout="topleft"
+        left="6"
+        multi_select="false"
+        name="alias_list"
+        top="58"
+        right="-6"
+        bottom="-6">
+        <flat_list_view.no_items_text
+            name="no_items_msg"
+            value="No friends to manage aliases for." />
+    </flat_list_view>
+</floater>

@@ -867,6 +867,13 @@
              parameter="friends_here" />
         </menu_item_call>
         <menu_item_call
+         label="Parcel IM Sender..."
+         name="Parcel IM Sender">
+            <menu_item_call.on_click
+             function="Floater.ToggleOrBringToFront"
+             parameter="parcel_im" />
+        </menu_item_call>
+        <menu_item_call
          label="Groups"
          name="My Groups"
          shortcut="control|shift|G">

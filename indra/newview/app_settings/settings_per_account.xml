@@ -1574,10 +1574,109 @@
             <key>Value</key>
             <map/>
         </map>
+    <key>ALFriendsHereCustomGreetings</key>
+        <map>
+            <key>Comment</key>
+            <string>Map of avatar ID to custom greeting used in the Friends Here floater.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>LLSD</string>
+            <key>Value</key>
+            <map/>
+        </map>
     <key>ALClubInviteCooldowns</key>
         <map>
             <key>Comment</key>
             <string>Map of avatar ID to epoch time of the last club invitation sent, used to prevent re-inviting too soon.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>LLSD</string>
+            <key>Value</key>
+            <map/>
+        </map>
+    <key>ALClubInviteNeverIM</key>
+        <map>
+            <key>Comment</key>
+            <string>Map of avatar ID to true if that contact must never receive a club invitation IM.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>LLSD</string>
+            <key>Value</key>
+            <map/>
+        </map>
+    <key>ALClubInviteSendDelay</key>
+        <map>
+            <key>Comment</key>
+            <string>Seconds to wait between each club invitation IM while sending to multiple contacts.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>F32</string>
+            <key>Value</key>
+            <real>10</real>
+        </map>
+    <key>ALClubInviteResendCooldownMinutes</key>
+        <map>
+            <key>Comment</key>
+            <string>Minutes a contact must wait before being re-invited after receiving a club invitation.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>F32</string>
+            <key>Value</key>
+            <real>30</real>
+        </map>
+    <key>ALFriendsHereCustomGreeting</key>
+        <map>
+            <key>Comment</key>
+            <string>Custom greeting template for the Friends Here floater. [name]/[alias] is replaced with each contact's name. Empty keeps the default Greet/Welcome back greetings.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>String</string>
+            <key>Value</key>
+            <string></string>
+        </map>
+    <key>ALParcelIMMessage</key>
+        <map>
+            <key>Comment</key>
+            <string>Custom IM message template for the Parcel IM floater.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>String</string>
+            <key>Value</key>
+            <string></string>
+        </map>
+    <key>ALParcelIMSendInterval</key>
+        <map>
+            <key>Comment</key>
+            <string>Interval in seconds between sending IMs to consecutive residents.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>S32</string>
+            <key>Value</key>
+            <integer>5</integer>
+        </map>
+    <key>ALParcelIMCooldown</key>
+        <map>
+            <key>Comment</key>
+            <string>Minutes during which a resident who received an IM won't receive another from this floater.</string>
+            <key>Persist</key>
+            <integer>1</integer>
+            <key>Type</key>
+            <string>S32</string>
+            <key>Value</key>
+            <integer>30</integer>
+        </map>
+    <key>ALParcelIMExclusions</key>
+        <map>
+            <key>Comment</key>
+            <string>Map of resident UUIDs to true for residents who should be excluded from the Parcel IM send process.</string>
             <key>Persist</key>
             <integer>1</integer>
             <key>Type</key>

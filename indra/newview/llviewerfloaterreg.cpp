@@ -188,9 +188,11 @@
 #include "rlvfloaters.h"
 // [/RLVa:KB]
 // ND: And for FS please put yours after this line, for easier merges too
+#include "alfloateralias.h"
 #include "alfloaterclubinvite.h"
 #include "alfloaterfriendshere.h"
 #include "alfloaterregiontracker.h"
+#include "alfloaterparcelim.h"
 #include "animationexplorer.h"
 #include "ao.h"
 #include "daeexport.h"
@@ -438,6 +440,8 @@ void LLViewerFloaterReg::registerFloaters()
     LLFloaterReg::add("classified", "floater_classified.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterClassified>);
     LLFloaterReg::add("club_invite", "floater_al_club_invite.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterClubInvite>);
     LLFloaterReg::add("friends_here", "floater_al_friends_here.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterFriendsHere>);
+    LLFloaterReg::add("aliases", "floater_al_aliases.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterAliases>);
+    LLFloaterReg::add("parcel_im", "floater_al_parcel_im.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterParcelIM>);
     LLFloaterReg::add("compile_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCompileQueue>);
     LLFloaterReg::add("conversation", "floater_conversation_log.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterConversationLog>);
     LLFloaterReg::add("add_landmark", "floater_create_landmark.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCreateLandmark>);
