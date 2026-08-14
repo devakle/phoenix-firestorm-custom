@@ -90,6 +90,7 @@ set(viewer_SOURCE_FILES
     alfloateralias.cpp
     alfloaterclubinvite.cpp
     alfloaterfriendshere.cpp
+    alfloaterparcelgroupinvite.cpp
     alfloaterregiontracker.cpp
     alfloaterparcelim.cpp
     animationexplorer.cpp
@@ -952,6 +953,7 @@ set(viewer_HEADER_FILES
     alfloateralias.h
     alfloaterclubinvite.h
     alfloaterfriendshere.h
+    alfloaterparcelgroupinvite.h
     alfloaterregiontracker.h
     alfloaterparcelim.h
     animationexplorer.h

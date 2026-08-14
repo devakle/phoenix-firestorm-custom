@@ -44,7 +44,11 @@ public:
     bool needsWelcomeBack(const LLUUID& id) const { return mNeedsWelcomeBack.count(id) > 0; }
 
     void onGreetSent(const LLUUID& id) { mGreetedAvatars.insert(id); }
-    void onWelcomeBackSent(const LLUUID& id) { mNeedsWelcomeBack.erase(id); }
+    void onWelcomeBackSent(const LLUUID& id)
+    {
+        mNeedsWelcomeBack.erase(id);
+        mGreetedAvatars.insert(id);
+    }
 
 private:
     bool tick() override;
@@ -55,6 +59,15 @@ private:
 
     typedef std::map<LLUUID, F64> arrival_time_map_t;
     arrival_time_map_t mArrivalTimes;
+
+    // Tracks when each avatar last left the agent's region. A return after a
+    // real region leave resets the arrival time and re-flags welcome-back.
+    arrival_time_map_t mAbsentSince;
+
+    // Tracks when each greeted avatar stopped being seen in the agent's parcel,
+    // so a transient absence does not falsely flag them as "left" and trigger
+    // a welcome-back on their return.
+    arrival_time_map_t mParcelAbsentSince;
 
     LLFlatListView* mFriendList = nullptr;
     LLTextBox*      mStatusText = nullptr;
