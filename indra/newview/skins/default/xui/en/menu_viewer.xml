@@ -874,6 +874,13 @@
              parameter="parcel_im" />
         </menu_item_call>
         <menu_item_call
+         label="Parcel Group Invite..."
+         name="Parcel Group Invite">
+            <menu_item_call.on_click
+             function="Floater.ToggleOrBringToFront"
+             parameter="parcel_group_invite" />
+        </menu_item_call>
+        <menu_item_call
          label="Groups"
          name="My Groups"
          shortcut="control|shift|G">
