@@ -191,6 +191,7 @@
 #include "alfloateralias.h"
 #include "alfloaterclubinvite.h"
 #include "alfloaterfriendshere.h"
+#include "alfloaterparcelgroupinvite.h"
 #include "alfloaterregiontracker.h"
 #include "alfloaterparcelim.h"
 #include "animationexplorer.h"
@@ -442,6 +443,7 @@ void LLViewerFloaterReg::registerFloaters()
     LLFloaterReg::add("friends_here", "floater_al_friends_here.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterFriendsHere>);
     LLFloaterReg::add("aliases", "floater_al_aliases.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterAliases>);
     LLFloaterReg::add("parcel_im", "floater_al_parcel_im.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterParcelIM>);
+    LLFloaterReg::add("parcel_group_invite", "floater_al_parcel_group_invite.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterParcelGroupInvite>);
     LLFloaterReg::add("compile_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCompileQueue>);
     LLFloaterReg::add("conversation", "floater_conversation_log.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterConversationLog>);
     LLFloaterReg::add("add_landmark", "floater_create_landmark.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCreateLandmark>);

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+        can_resize="false"
+        can_minimize="false"
+        height="300"
+        min_height="260"
+        min_width="380"
+        name="parcel_group_invite"
+        single_instance="true"
+        title="PARCEL GROUP INVITE"
+        width="440">
+
+    <floater.string name="StatusNoGroup">
+        Select a group and enable the toggle to invite everyone on this parcel.
+    </floater.string>
+    <floater.string name="StatusNoInvitePower">
+        You have no groups where you are allowed to invite members.
+    </floater.string>
+    <floater.string name="StatusIdle">
+        The toggle is off. Enable it to start inviting, or press Send Now for a single round.
+    </floater.string>
+    <floater.string name="StatusLoadingMembers">
+        Loading the group member list...
+    </floater.string>
+    <floater.string name="StatusWaitingFirstRound">
+        Scanning this parcel for the first invite round...
+    </floater.string>
+    <floater.string name="StatusCountdown">
+        Next invite round in [MINUTES] minute(s).
+    </floater.string>
+    <floater.string name="StatusRoundDone">
+        Invited [COUNT] resident(s). Next round in [MINUTES] min.
+    </floater.string>
+    <floater.string name="StatusNoneToInvite">
+        No new residents to invite on this parcel.
+    </floater.string>
+
+    <combo_box
+        follows="left|top|right"
+        height="23"
+        label="Group"
+        label_width="150"
+        layout="topleft"
+        left="6"
+        name="group_combo"
+        top="14"
+        right="-6"
+        tool_tip="Group that will receive the invitations. Only groups where you can invite members are listed." />
+
+    <spinner
+        follows="left|top|right"
+        decimal_digits="0"
+        height="23"
+        increment="5"
+        initial_value="10"
+        label="Round cooldown (min)"
+        label_width="150"
+        layout="topleft"
+        left="6"
+        max_val="720"
+        min_val="1"
+        name="cooldown_spin"
+        top="46"
+        width="270" />
+
+    <check_box
+        follows="left|top|right"
+        height="20"
+        label="Enabled - send an invite round every cooldown period"
+        layout="topleft"
+        left="6"
+        name="active_check"
+        top="82"
+        right="-6" />
+
+    <button
+        follows="right|top"
+        height="24"
+        label="Send Now"
+        label_selected="Send Now"
+        layout="topleft"
+        left="-96"
+        name="send_now_btn"
+        top="78"
+        width="90"
+        tool_tip="Run one invite round immediately." />
+
+    <text
+        follows="left|top|right|bottom"
+        font="SansSerifSmall"
+        height="120"
+        layout="topleft"
+        left="8"
+        name="status_text"
+        top="118"
+        right="-8"
+        bottom="-8"
+        wrap="true" />
+</floater>
