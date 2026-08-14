@@ -57,6 +57,16 @@ static void setTooltipIfTruncated(LLTextBox* text_box, const std::string& full_t
 // treat as "recently arrived" when present for less than this many seconds
 static const F32 kRecentSeconds = 5.f * 60.f;
 
+// an avatar's arrival time is only reset after it has been continuously absent
+// from the agent's region for this many seconds, so a transient drop from the
+// avatar list does not reset the time shown for someone still on the parcel
+static const F64 kAbsentGraceSeconds = 60.0;
+
+// an avatar missing from the agent's region for this many seconds is a real
+// leave (reconnect / teleport-away): on return its arrival time is reset and,
+// if it was greeted, it gets flagged for welcome-back
+static const F64 kRegionResetSeconds = 8.0;
+
 // send_chat_from_viewer is a file-local free function in llfloaterimnearbychat.cpp
 // (the chat bar and gesture manager forward their text through it).
 extern void send_chat_from_viewer(std::string utf8_out_text, EChatType type, S32 channel);
@@ -324,6 +334,11 @@ bool ALFloaterFriendsHere::postBuild()
 void ALFloaterFriendsHere::onOpen(const LLSD& key)
 {
     mEventTimer.start();
+    // welcome-back tracking is scoped to a floater session: reopening should not
+    // re-flag avatars from a previous session. Arrival times keep counting.
+    mLeftAfterGreeting.clear();
+    mNeedsWelcomeBack.clear();
+    mParcelAbsentSince.clear();
     refreshFriendsList();
 }
 
@@ -361,14 +376,42 @@ void ALFloaterFriendsHere::refreshFriendsList()
         mGreetedAvatars.clear();
         mLeftAfterGreeting.clear();
         mNeedsWelcomeBack.clear();
+        mAbsentSince.clear();
+        mParcelAbsentSince.clear();
     }
 
     std::vector<LLUUID> present;
     arrival_time_map_t arrivals_now;
 
+    std::set<LLUUID> previously_present;
+    std::vector<LLPanel*> prev_panels;
+    mFriendList->getItems(prev_panels);
+    for (LLPanel* panel : prev_panels)
+    {
+        ALFriendsHereItem* item = dynamic_cast<ALFriendsHereItem*>(panel);
+        if (item)
+        {
+            previously_present.insert(item->getAvatarID());
+        }
+    }
+
     uuid_vec_t avatar_ids;
     std::vector<LLVector3d> avatar_positions;
     LLWorld::getInstance()->getAvatars(&avatar_ids, &avatar_positions);
+
+    // avatars currently known to be in the agent's region; used below so arrival
+    // times survive a buddy stepping off the parcel but staying in the region
+    std::set<LLUUID> avatars_in_region;
+    for (S32 i = 0; i < (S32)avatar_ids.size(); ++i)
+    {
+        const LLVector3d& global_pos = avatar_positions[i];
+        const LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(global_pos);
+        if (region && region->getRegionID() == scope_region_id)
+        {
+            avatars_in_region.insert(avatar_ids[i]);
+        }
+    }
+
     for (S32 i = 0; i < (S32)avatar_ids.size(); ++i)
     {
         const LLUUID& id = avatar_ids[i];
@@ -397,26 +440,86 @@ void ALFloaterFriendsHere::refreshFriendsList()
         else
         {
             arrival = LLDate::now().secondsSinceEpoch();
+        }
+        arrivals_now[id] = arrival;
+        mParcelAbsentSince.erase(id);
+
+        if (previously_present.find(id) == previously_present.end())
+        {
             if (mLeftAfterGreeting.count(id))
             {
                 mNeedsWelcomeBack.insert(id);
                 mLeftAfterGreeting.erase(id);
             }
         }
-        arrivals_now[id] = arrival;
     }
 
-    // drop ids that are no longer present, keep arrival times for continuing ones
+    // Mark those who left the parcel but kept an eye on the region, only after a
+    // continuous absence of more than the grace period so a transient blip does
+    // not falsely trigger a welcome-back when they return
+    const F64 now_present = LLDate::now().secondsSinceEpoch();
+    for (const LLUUID& id : previously_present)
+    {
+        if (arrivals_now.find(id) != arrivals_now.end())
+        {
+            mParcelAbsentSince.erase(id);
+            continue;
+        }
+        if (avatars_in_region.find(id) == avatars_in_region.end())
+        {
+            // left the region entirely: handled by the region loop below
+            mParcelAbsentSince.erase(id);
+            continue;
+        }
+        if (!mGreetedAvatars.count(id))
+        {
+            mParcelAbsentSince.erase(id);
+            continue;
+        }
+        arrival_time_map_t::const_iterator dep = mParcelAbsentSince.find(id);
+        if (dep == mParcelAbsentSince.end())
+        {
+            mParcelAbsentSince[id] = now_present;
+        }
+        else if (now_present - dep->second >= kAbsentGraceSeconds)
+        {
+            mLeftAfterGreeting.insert(id);
+            mNeedsWelcomeBack.erase(id);
+            mParcelAbsentSince.erase(id);
+        }
+    }
+
+    // Reconcile with the agent's region. An avatar missing from the region is a
+    // real leave (reconnect / teleport-away), unlike a short blotch in the avatar
+    // list: flag a welcome-back for when it returns and, once it has been away
+    // for a few seconds, reset its arrival time so the return counts as a fresh
+    // arrival. The welcome-back flag is intentionally kept across the absence.
+    const F64 now = LLDate::now().secondsSinceEpoch();
     for (arrival_time_map_t::const_iterator it = mArrivalTimes.begin(); it != mArrivalTimes.end();)
     {
-        if (arrivals_now.find(it->first) == arrivals_now.end())
+        const LLUUID& id = it->first;
+        if (avatars_in_region.find(id) != avatars_in_region.end())
         {
-            const LLUUID& id = it->first;
-            if (mGreetedAvatars.count(id))
+            mAbsentSince.erase(id);
+            ++it;
+            continue;
+        }
+        if (mAbsentSince.find(id) == mAbsentSince.end())
+        {
+            mAbsentSince[id] = now;
+            if (mGreetedAvatars.count(id) || mNeedsWelcomeBack.count(id))
             {
                 mLeftAfterGreeting.insert(id);
+                mGreetedAvatars.erase(id);
                 mNeedsWelcomeBack.erase(id);
             }
+            ++it;
+            continue;
+        }
+        if (now - mAbsentSince[id] >= kRegionResetSeconds)
+        {
+            mAbsentSince.erase(id);
+            mParcelAbsentSince.erase(id);
             mArrivalTimes.erase(it++);
         }
         else
