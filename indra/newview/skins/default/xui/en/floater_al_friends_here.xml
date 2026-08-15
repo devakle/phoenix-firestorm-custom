@@ -48,10 +48,21 @@
         top="10"
         width="140" />
 
+    <button
+        follows="top|left"
+        height="20"
+        label="Hi all :)"
+        label_selected="Hi all :)"
+        left="8"
+        name="hi_all_btn"
+        tool_tip="Send 'hi all :)' to everyone in your parcel at once."
+        top="30"
+        width="90" />
+
     <line_editor
         follows="top|left|right"
         height="20"
-        left="8"
+        left="104"
         max_length_chars="127"
         name="custom_greeting"
         right="-8"

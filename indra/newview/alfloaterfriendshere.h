@@ -39,6 +39,7 @@ public:
     void onOpen(const LLSD& key) override;
     void onClose(bool app_quitting) override;
     void refreshForAliasChange();
+    void onClickHelloAll();
 
     bool hasBeenGreeted(const LLUUID& id) const { return mGreetedAvatars.count(id) > 0; }
     bool needsWelcomeBack(const LLUUID& id) const { return mNeedsWelcomeBack.count(id) > 0; }
