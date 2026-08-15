@@ -150,6 +150,32 @@ public:
         return (now - mArrivalTime) < kRecentSeconds;
     }
 
+    void updateNameColor()
+    {
+        LLUIColor color = LLUIColorTable::instance().getColor("White");
+        ALFloaterFriendsHere* friends_here = LLFloaterReg::findTypedInstance<ALFloaterFriendsHere>("friends_here");
+        if (friends_here)
+        {
+            if (friends_here->needsWelcomeBack(mAvatarID))
+            {
+                color = LLUIColorTable::instance().getColor("Yellow");
+            }
+            else if (friends_here->hasBeenGreeted(mAvatarID))
+            {
+                color = LLUIColorTable::instance().getColor("White");
+            }
+            else if (isRecentArrival())
+            {
+                color = LLUIColorTable::instance().getColor("Green");
+            }
+        }
+        else if (isRecentArrival())
+        {
+            color = LLUIColorTable::instance().getColor("Green");
+        }
+        mNameText->setColor(color);
+    }
+
 private:
     void onGreet()
     {
@@ -264,32 +290,6 @@ private:
         setTooltipIfTruncated(mAliasText, label);
     }
 
-    void updateNameColor()
-    {
-        LLUIColor color = LLUIColorTable::instance().getColor("White");
-        ALFloaterFriendsHere* friends_here = LLFloaterReg::findTypedInstance<ALFloaterFriendsHere>("friends_here");
-        if (friends_here)
-        {
-            if (friends_here->needsWelcomeBack(mAvatarID))
-            {
-                color = LLUIColorTable::instance().getColor("Yellow");
-            }
-            else if (friends_here->hasBeenGreeted(mAvatarID))
-            {
-                color = LLUIColorTable::instance().getColor("White");
-            }
-            else if (isRecentArrival())
-            {
-                color = LLUIColorTable::instance().getColor("Green");
-            }
-        }
-        else if (isRecentArrival())
-        {
-            color = LLUIColorTable::instance().getColor("Green");
-        }
-        mNameText->setColor(color);
-    }
-
     LLTextBox*    mNameText = nullptr;
     LLTextBox*    mTimeText = nullptr;
     LLTextBox*    mAliasText = nullptr;
@@ -322,6 +322,7 @@ bool ALFloaterFriendsHere::postBuild()
     mStatusText = getChild<LLTextBox>("status_text");
     mRefreshBtn = getChild<LLButton>("refresh_btn");
     mRefreshBtn->setClickedCallback(boost::bind(&ALFloaterFriendsHere::refreshFriendsList, this));
+    getChild<LLButton>("hi_all_btn")->setClickedCallback(boost::bind(&ALFloaterFriendsHere::onClickHelloAll, this));
     getChild<LLButton>("aliases_btn")->setClickedCallback(boost::bind(&ALFloaterFriendsHere::onClickAliases, this));
     mCustomGreetingEdit = getChild<LLLineEditor>("custom_greeting");
     mCustomGreetingEdit->setText(gSavedPerAccountSettings.getString(AL_FRIENDS_HERE_CUSTOM_GREETING_SETTING));
@@ -597,6 +598,23 @@ void ALFloaterFriendsHere::refreshFriendsList()
 void ALFloaterFriendsHere::onClickAliases()
 {
     LLFloaterReg::showInstance("aliases");
+}
+
+void ALFloaterFriendsHere::onClickHelloAll()
+{
+    send_chat_from_viewer("hi all :)", CHAT_TYPE_NORMAL, 0);
+
+    std::vector<LLPanel*> items;
+    mFriendList->getItems(items);
+    for (LLPanel* panel : items)
+    {
+        ALFriendsHereItem* item = dynamic_cast<ALFriendsHereItem*>(panel);
+        if (item)
+        {
+            onGreetSent(item->getAvatarID());
+            item->updateNameColor();
+        }
+    }
 }
 
 void ALFloaterFriendsHere::refreshForAliasChange()
