@@ -341,6 +341,8 @@ bool LLStatusBar::postBuild()
 
     mMediaToggle = getChild<LLButton>("media_toggle_btn");
     mMediaToggle->setClickedCallback( &LLStatusBar::onClickMediaToggle, this );
+    mStreamCopyBtn = getChild<LLButton>("stream_copy_btn");
+    mStreamCopyBtn->setClickedCallback(&LLStatusBar::onClickStreamUrlCopy, this);
     // <FS: KC> FIRE-19697: Add setting to disable status bar icon menu popup on mouseover
     // mMediaToggle->setMouseEnterCallback(boost::bind(&LLStatusBar::onMouseEnterNearbyMedia, this));
     if (gSavedSettings.getBOOL("FSStatusBarMenuButtonPopupOnRollover"))
@@ -1183,6 +1185,29 @@ void LLStatusBar::onClickStreamToggle(void* data)
     LLStatusBar *status_bar = (LLStatusBar*)data;
     bool enable = ! status_bar->mStreamToggle->getValue();
     status_bar->toggleStream(enable);
+}
+
+// static
+void LLStatusBar::onClickStreamUrlCopy(void* data)
+{
+    LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+    if (!parcel)
+    {
+        return;
+    }
+
+    std::string stream_url = parcel->getMusicURL();
+    LLStringUtil::trim(stream_url);
+    if (stream_url.empty())
+    {
+        return;
+    }
+
+    LLClipboard::instance().copyToClipboard(utf8str_to_wstring(stream_url), 0, static_cast<S32>(stream_url.size()));
+
+    LLSD args;
+    args["STREAMURL"] = stream_url;
+    LLNotificationsUtil::add("FSStreamURLCopied", args);
 }
 
 void LLStatusBar::toggleStream(bool enable)

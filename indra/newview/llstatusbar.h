@@ -177,6 +177,7 @@ private:
     static void onClickStreamToggle(void* data);        // <FS:Zi> Media/Stream separation
     static void onClickMediaToggle(void* data);
     static void onClickVolume(void* data); // <FS:Ansariel> Open popup panels on click if FSStatusBarMenuButtonPopupOnRollover is disabled
+    static void onClickStreamUrlCopy(void* data);
 
     static void onClickRefreshBalance(void* data);
     void onClickToggleBalance();
@@ -334,6 +335,7 @@ private:
     LLTextBox   *mBoxBalance;
     LLButton    *mStreamToggle;     // ## Zi: Media/Stream separation
     LLButton    *mMediaToggle;
+    LLButton    *mStreamCopyBtn;
     LLButton    *mBandwidthButton; // <FS:PP> FIRE-6287: Clicking on traffic indicator toggles Lag Meter window
     // <FS:Ansariel> Script debug
     LLIconCtrl  *mScriptOut;

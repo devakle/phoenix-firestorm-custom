@@ -432,6 +432,16 @@
      top="2"
      name="volume_btn"
      width="16" />
+    <button
+     follows="right|top"
+     height="16"
+     image_unselected="Copy"
+     image_pressed="CopyBright"
+     left_pad="4"
+     top="2"
+     name="stream_copy_btn"
+     tool_tip="Copy parcel music stream URL to clipboard"
+     width="16" />
     <text
      name="FPSText"
      type="string"

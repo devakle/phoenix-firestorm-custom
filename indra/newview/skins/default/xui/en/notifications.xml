@@ -7198,6 +7198,13 @@ Link to this from a web page to give others easy access to this location, or try
   </notification>
 
   <notification
+   icon="notify.tga"
+   name="FSStreamURLCopied"
+   type="notify">
+Stream URL copied to clipboard: [STREAMURL]
+  </notification>
+
+  <notification
    icon="alertmodal.tga"
    name="WLSavePresetAlert"
    type="alertmodal">
