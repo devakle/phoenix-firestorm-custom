@@ -52,6 +52,7 @@ class LLAccordionCtrlTab;
 // Firestorm declarations
 class LLMenuGL;
 class FSPanelRadar;
+class FSPanelGreeter;
 
 class LLPanelPeople
     : public LLPanel
@@ -164,6 +165,7 @@ private:
     LLAvatarList*           mContactSetList;    // [FS:CR] Contact sets
     // <FS:Ansariel> Firestorm radar
     FSPanelRadar*           mRadarPanel;
+    FSPanelGreeter*         mGreeterPanel;
     // </FS:Ansariel> Firestorm radar
     LLAvatarList*           mRecentList;
     LLGroupList*            mGroupList;
