@@ -61,6 +61,8 @@ public:
 
     // Static mapping of resident ID to last send timestamp in seconds
     static std::map<LLUUID, F64> sLastSentTimes;
+    // First time an avatar was seen in the current parcel (for 10-min dwell check)
+    static std::map<LLUUID, F64> sFirstSeenTimes;
 
 private:
     void populateList();

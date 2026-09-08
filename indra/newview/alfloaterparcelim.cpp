@@ -37,6 +37,9 @@ static const std::string SETTING_COOLDOWN("ALParcelIMCooldown");
 static const std::string SETTING_EXCLUSIONS("ALParcelIMExclusions");
 
 std::map<LLUUID, F64> ALFloaterParcelIM::sLastSentTimes;
+std::map<LLUUID, F64> ALFloaterParcelIM::sFirstSeenTimes;
+
+static constexpr F64 MIN_PARCEL_DWELL_SECONDS = 600.0; // 10 minutes
 
 static void setTooltipIfTruncated(LLTextBox* text_box, const std::string& full_text)
 {
@@ -46,6 +49,36 @@ static void setTooltipIfTruncated(LLTextBox* text_box, const std::string& full_t
                                                : 0.f;
     const F32 available_width = (F32)text_box->getRect().getWidth();
     text_box->setToolTip(text_width > available_width ? full_text : LLStringUtil::null);
+}
+
+static bool isAvatarStillInCurrentParcel(const LLUUID& avatar_id)
+{
+    const LLViewerRegion* agent_region = gAgent.getRegion();
+    if (!agent_region) return false;
+    const LLUUID scope_region_id = agent_region->getRegionID();
+
+    uuid_vec_t avatar_ids;
+    std::vector<LLVector3d> avatar_positions;
+    LLWorld::getInstance()->getAvatars(&avatar_ids, &avatar_positions);
+    for (size_t i = 0; i < avatar_ids.size(); ++i)
+    {
+        if (avatar_ids[i] == avatar_id)
+        {
+            const LLVector3d& global_pos = avatar_positions[i];
+            const LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(global_pos);
+            if (!region || region->getRegionID() != scope_region_id) return false;
+            if (!LLViewerParcelMgr::getInstance()->inAgentParcel(global_pos)) return false;
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool hasDwelledAtLeast10Min(const LLUUID& avatar_id, F64 now)
+{
+    auto it = ALFloaterParcelIM::sFirstSeenTimes.find(avatar_id);
+    if (it == ALFloaterParcelIM::sFirstSeenTimes.end()) return false;
+    return (now - it->second) >= MIN_PARCEL_DWELL_SECONDS;
 }
 
 ALParcelIMContactItem::ALParcelIMContactItem(const LLUUID& avatar_id)
@@ -237,6 +270,12 @@ void ALFloaterParcelIM::populateList()
         // Verify parcel
         if (!LLViewerParcelMgr::getInstance()->inAgentParcel(global_pos)) continue;
 
+        // Track first time seen in parcel for 10-min dwell check
+        if (sFirstSeenTimes.find(id) == sFirstSeenTimes.end())
+        {
+            sFirstSeenTimes[id] = now;
+        }
+
         ALParcelIMContactItem* item = new ALParcelIMContactItem(id);
         mResidentList->addItem(item, LLSD(id));
         item->updateStatus(now, cooldown_duration);
@@ -336,6 +375,18 @@ void ALFloaterParcelIM::startSending()
                 continue;
             }
 
+            // Must still be in current parcel
+            if (!isAvatarStillInCurrentParcel(id))
+            {
+                continue;
+            }
+
+            // Must have been in parcel at least 10 minutes
+            if (!hasDwelledAtLeast10Min(id, now))
+            {
+                continue;
+            }
+
             mPendingRecipients.push_back(id);
         }
     }
@@ -385,6 +436,19 @@ void ALFloaterParcelIM::stopSending()
 
 bool ALFloaterParcelIM::sendNextIM()
 {
+    // Skip any recipients that no longer satisfy parcel/dwell checks before sending
+    F64 now_check = LLDate::now().secondsSinceEpoch();
+    while (mCurrentIndex < mPendingRecipients.size())
+    {
+        const LLUUID& cand = mPendingRecipients[mCurrentIndex];
+        if (!isAvatarStillInCurrentParcel(cand) || !hasDwelledAtLeast10Min(cand, now_check))
+        {
+            ++mCurrentIndex;
+            continue;
+        }
+        break;
+    }
+
     if (mCurrentIndex >= mPendingRecipients.size())
     {
         stopSending();
