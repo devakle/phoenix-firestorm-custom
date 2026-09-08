@@ -30,6 +30,7 @@
 #include "lldate.h"
 #include "llimview.h"
 #include "llviewerregion.h"
+#include <set>
 
 static const std::string SETTING_MESSAGE("ALParcelIMMessage");
 static const std::string SETTING_INTERVAL("ALParcelIMSendInterval");
@@ -80,6 +81,103 @@ static bool hasDwelledAtLeast10Min(const LLUUID& avatar_id, F64 now)
     if (it == ALFloaterParcelIM::sFirstSeenTimes.end()) return false;
     return (now - it->second) >= MIN_PARCEL_DWELL_SECONDS;
 }
+
+// Global dwell tracker: updates sFirstSeenTimes from nearby/LLWorld even when floater is closed.
+// Mimics ALFloaterFriendsHere grace logic: 60s for parcel leave, 8s for region leave.
+static std::map<LLUUID, F64> sParcelAbsentSince;
+static std::map<LLUUID, F64> sRegionAbsentSince;
+static constexpr F64 kParcelGraceSeconds = 60.0;
+static constexpr F64 kRegionResetSeconds = 8.0;
+
+class ParcelDwellTracker : public LLEventTimer
+{
+public:
+    ParcelDwellTracker() : LLEventTimer(5.0f) {}
+    bool tick() override
+    {
+        const LLViewerRegion* agent_region = gAgent.getRegion();
+        if (!agent_region) return false;
+        const LLUUID scope_region_id = agent_region->getRegionID();
+        const F64 now = LLDate::now().secondsSinceEpoch();
+
+        uuid_vec_t avatar_ids;
+        std::vector<LLVector3d> avatar_positions;
+        LLWorld::getInstance()->getAvatars(&avatar_ids, &avatar_positions);
+
+        std::set<LLUUID> avatars_in_region;
+        std::set<LLUUID> avatars_in_parcel;
+        for (size_t i = 0; i < avatar_ids.size(); ++i)
+        {
+            const LLUUID& id = avatar_ids[i];
+            if (id.isNull() || id == gAgent.getID()) continue;
+            const LLVector3d& global_pos = avatar_positions[i];
+            const LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(global_pos);
+            if (!region || region->getRegionID() != scope_region_id) continue;
+            avatars_in_region.insert(id);
+            if (LLViewerParcelMgr::getInstance()->inAgentParcel(global_pos))
+            {
+                avatars_in_parcel.insert(id);
+            }
+        }
+
+        // New or still present in parcel: record first seen, clear absences
+        for (const LLUUID& id : avatars_in_parcel)
+        {
+            if (ALFloaterParcelIM::sFirstSeenTimes.find(id) == ALFloaterParcelIM::sFirstSeenTimes.end())
+            {
+                ALFloaterParcelIM::sFirstSeenTimes[id] = now;
+            }
+            sParcelAbsentSince.erase(id);
+            sRegionAbsentSince.erase(id);
+        }
+
+        // Copy keys to avoid mutation while iterating
+        std::vector<LLUUID> tracked_ids;
+        tracked_ids.reserve(ALFloaterParcelIM::sFirstSeenTimes.size());
+        for (auto& kv : ALFloaterParcelIM::sFirstSeenTimes) tracked_ids.push_back(kv.first);
+
+        for (const LLUUID& id : tracked_ids)
+        {
+            if (avatars_in_parcel.find(id) != avatars_in_parcel.end()) continue;
+
+            if (avatars_in_region.find(id) != avatars_in_region.end())
+            {
+                // Left parcel but still in region -> grace 60s
+                auto it = sParcelAbsentSince.find(id);
+                if (it == sParcelAbsentSince.end())
+                {
+                    sParcelAbsentSince[id] = now;
+                }
+                else if (now - it->second >= kParcelGraceSeconds)
+                {
+                    ALFloaterParcelIM::sFirstSeenTimes.erase(id);
+                    sParcelAbsentSince.erase(id);
+                }
+                sRegionAbsentSince.erase(id);
+            }
+            else
+            {
+                // Left region entirely -> grace 8s
+                auto it = sRegionAbsentSince.find(id);
+                if (it == sRegionAbsentSince.end())
+                {
+                    sRegionAbsentSince[id] = now;
+                }
+                else if (now - it->second >= kRegionResetSeconds)
+                {
+                    ALFloaterParcelIM::sFirstSeenTimes.erase(id);
+                    sParcelAbsentSince.erase(id);
+                    sRegionAbsentSince.erase(id);
+                }
+                // Also clear parcel absent since we are in region-absent state
+                // (kept for completeness)
+            }
+        }
+        return false; // keep ticking
+    }
+};
+
+static ParcelDwellTracker sParcelDwellTrackerInstance;
 
 ALParcelIMContactItem::ALParcelIMContactItem(const LLUUID& avatar_id)
     : LLPanel()
