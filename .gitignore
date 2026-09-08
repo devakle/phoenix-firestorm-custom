@@ -130,3 +130,9 @@ firestorm.code-workspace
 .github/release.yaml
 
 checks.json
+
+# Local tooling / build artifacts (emi-custom)
+build-ninja-64/
+.atl/
+.clangd
+opencode.json
