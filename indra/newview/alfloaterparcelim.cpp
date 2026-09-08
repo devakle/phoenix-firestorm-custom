@@ -160,7 +160,7 @@ bool ALFloaterParcelIM::postBuild()
     // Load initial values
     mMessageEdit->setText(gSavedPerAccountSettings.getString(SETTING_MESSAGE));
     S32 interval = gSavedPerAccountSettings.getS32(SETTING_INTERVAL);
-    if (interval < 5) interval = 5;
+    if (interval < 1) interval = 1;
     mIntervalSpinner->setValue(interval);
 
     S32 cooldown = gSavedPerAccountSettings.getS32(SETTING_COOLDOWN);
