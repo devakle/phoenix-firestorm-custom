@@ -94,6 +94,7 @@ void FSPanelGreeter::updateList(const std::vector<LLSD>& entries, const LLSD& /*
         if (av_id == gAgentID) continue;
         if (LLAvatarTracker::instance().isBuddy(av_id)) continue;
         if (mGreeted.find(av_id) != mGreeted.end()) continue;
+        if (!entry.has("on_parcel") || !entry["on_parcel"].asBoolean()) continue;
         // RLVa: if names hidden, don't include? Still show but obey filter later.
         // Keep entry even if RLVa hides names - list will be empty if blocked.
 
@@ -154,25 +155,43 @@ void FSPanelGreeter::onGreetClicked()
         joined += names[i];
     }
 
-    std::string tmpl = gSavedSettings.getString("GreeterMessage");
+    // Read directly from editor so it works even without pressing Enter
+    std::string tmpl = mMessageEditor ? mMessageEditor->getValue().asString()
+                                      : gSavedSettings.getString("GreeterMessage");
+    // Persist for next session
+    if (mMessageEditor) gSavedSettings.setString("GreeterMessage", tmpl);
+
     std::string out;
-    const std::string placeholder = "{NAMES}";
-    auto pos = tmpl.find(placeholder);
-    if (pos != std::string::npos)
+
+    // Case-insensitive replacement of {names}, {NAMES}, {Names}, etc.
+    // Replace ALL occurrences, not just the first.
+    const std::string placeholder_lower = "{names}";
     {
-        out = tmpl;
-        out.replace(pos, placeholder.size(), joined);
+        std::string lower_tmpl = tmpl;
+        LLStringUtil::toLower(lower_tmpl);
+
+        size_t pos = 0;
+        bool found = false;
+        while ((pos = lower_tmpl.find(placeholder_lower, pos)) != std::string::npos)
+        {
+            if (!found)
+            {
+                out = tmpl;
+                found = true;
+            }
+            out.replace(pos, placeholder_lower.size(), joined);
+            pos += joined.size();
+            lower_tmpl = out;
+            LLStringUtil::toLower(lower_tmpl);
+        }
+
+        if (!found)
+        {
+            out = tmpl;
+        }
     }
-    else if (!tmpl.empty())
-    {
-        // If user didn't include placeholder, append names
-        // Avoid double spacing
-        if (tmpl.back() != ' ' && tmpl.back() != ',' )
-            out = tmpl + " " + joined;
-        else
-            out = tmpl + joined;
-    }
-    else
+
+    if (out.empty())
     {
         out = joined;
     }
