@@ -744,5 +744,31 @@ Learn about [https://community.secondlife.com/knowledgebase/joining-and-particip
              right="-1" />
         </panel>
 
+<!-- ============================== GREETER tab ======================= -->
+
+        <panel
+         background_opaque="false"
+         background_visible="false"
+         follows="all"
+         height="383"
+         label="Greeter"
+         layout="topleft"
+         left="0"
+         help_topic="people_greeter_tab"
+         name="greeter_panel"
+         right="-1"
+         top="0">
+            <panel
+             class="fs_panel_greeter"
+             height="383"
+             name="panel_greeter"
+             filename="panel_fs_greeter.xml"
+             follows="all"
+             layout="topleft"
+             left="0"
+             top="0"
+             right="-1" />
+        </panel>
+
     </tab_container>
 </panel>

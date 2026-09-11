@@ -873,15 +873,22 @@
              function="Floater.ToggleOrBringToFront"
              parameter="parcel_im" />
         </menu_item_call>
-        <menu_item_call
-         label="Parcel Group Invite..."
-         name="Parcel Group Invite">
-            <menu_item_call.on_click
-             function="Floater.ToggleOrBringToFront"
-             parameter="parcel_group_invite" />
-        </menu_item_call>
-        <menu_item_call
-         label="Groups"
+         <menu_item_call
+          label="Parcel Group Invite..."
+          name="Parcel Group Invite">
+             <menu_item_call.on_click
+              function="Floater.ToggleOrBringToFront"
+              parameter="parcel_group_invite" />
+         </menu_item_call>
+         <menu_item_call
+          label="Greeter"
+          name="Greeter">
+             <menu_item_call.on_click
+              function="Floater.Toggle"
+              parameter="fs_greeter" />
+         </menu_item_call>
+         <menu_item_call
+          label="Groups"
          name="My Groups"
          shortcut="control|shift|G">
             <menu_item_call.on_click

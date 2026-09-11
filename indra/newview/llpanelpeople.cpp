@@ -84,6 +84,7 @@
 // Firestorm includes
 #include "fscommon.h"
 #include "fspanelradar.h"
+#include "fspanelgreeter.h"
 #include "lggcontactsets.h"
 #include "llcombobox.h"
 #include "lllayoutstack.h"
@@ -98,6 +99,7 @@ static const std::string GROUP_TAB_NAME     = "groups_panel";
 static const std::string RECENT_TAB_NAME    = "recent_panel";
 static const std::string BLOCKED_TAB_NAME   = "blocked_panel"; // blocked avatars
 static const std::string CONTACT_SETS_TAB_NAME = "contact_sets_panel";  // [FS:CR] Contact sets
+static const std::string GREETER_TAB_NAME  = "greeter_panel";
 static const std::string COLLAPSED_BY_USER  = "collapsed_by_user";
 
 // [FS] FIRE-12229
@@ -599,6 +601,7 @@ LLPanelPeople::LLPanelPeople()
         //mMiniMap(NULL)
         mMiniMap(NULL),
         mRadarPanel(NULL),
+        mGreeterPanel(NULL),
         // </FS:Ansariel> Firestorm radar
         // <FS:Ansariel> FIRE-4740: Friend counter in people panel
         mFriendsTabContainer(NULL)
@@ -762,6 +765,12 @@ bool LLPanelPeople::postBuild()
     // Externalized to FSRadar
     //mNearbyList->setRlvCheckShowNames(true);
 // [/RLVa:KB]
+
+    // Greeter panel lives in its own tab
+    if (LLPanel* greeter_tab = getChild<LLPanel>(GREETER_TAB_NAME, true))
+    {
+        mGreeterPanel = greeter_tab->findChild<FSPanelGreeter>("panel_greeter");
+    }
 
     mMiniMap = nearby_tab->getChild<LLNetMap>("Net Map", true);
     // <FS:Ansariel> Synchronize tooltips throughout instances

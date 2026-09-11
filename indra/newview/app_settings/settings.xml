@@ -699,6 +699,18 @@
       <integer>0</integer>
     </map>
 
+  <key>GreeterMessage</key>
+    <map>
+      <key>Comment</key>
+      <string>Greeter welcome message template. Use {NAMES} where the newcomer list should appear.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>helloooo welcome in {NAMES}!</string>
+    </map>
+
   <key>AvatarSitOnAway</key>
     <map>
       <key>Comment</key>
